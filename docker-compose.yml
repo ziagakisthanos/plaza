@@ -1,0 +1,11 @@
+services:
+  mongodb:
+    image: mongo:7
+    container_name: buy01-mongo
+    ports:
+      - "27017:27017"      # Mongo's default port
+    volumes:
+      - mongo-data:/data/db   # persist data so it survives container restarts
+
+volumes:
+  mongo-data:

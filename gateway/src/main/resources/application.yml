@@ -1,0 +1,13 @@
+server:
+  port: 8080          # angular will hit this port
+
+spring:
+  application:
+    name: gateway
+
+eureka:
+  client:
+    register-with-eureka: true    # default value
+    fetch-registry: true          # default value
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
