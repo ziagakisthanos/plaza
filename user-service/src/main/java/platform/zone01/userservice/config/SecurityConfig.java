@@ -52,12 +52,10 @@ public class SecurityConfig {
                 )
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
                 .exceptionHandling(ex -> ex
-                        .authenticationEntryPoint((request, response, authException) -> {
-                            writeError(response, HttpStatus.UNAUTHORIZED, "Authentication required", request);
-                        })
-                        .accessDeniedHandler((request, response, accessDeniedException) -> {
-                            writeError(response, HttpStatus.FORBIDDEN, "Access denied", request);
-                        })
+                        .authenticationEntryPoint((request, response, authException) ->
+                                writeError(response, HttpStatus.UNAUTHORIZED, "Authentication required", request))
+                        .accessDeniedHandler((request, response, accessDeniedException) ->
+                                writeError(response, HttpStatus.FORBIDDEN, "Access denied", request))
                 )
                 .build();
     }

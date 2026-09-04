@@ -3,11 +3,9 @@ package platform.zone01.userservice.dto;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.Setter;
 
 import java.time.Instant;
 import java.util.Map;
-import java.util.Optional;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @AllArgsConstructor
