@@ -4,6 +4,9 @@ we are building with microservices
 
 - common-security
 
+extracting all jwt logic out of service into a new library so all services can reuse them. Each
+service keeps its own SecurityConfig for service-specific route rules.
+
 
 ## 5 Services
 - Discovery
