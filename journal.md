@@ -1,31 +1,31 @@
 buy-01 is the parent of the multi-modular architecture 
 we are building with microservices
+## 1 Library
 
-### 5 services
+- common-security
+
+
+## 5 Services
 - Discovery
 - Gateway
 - User
 - Product
 - Media
 
-### DISCOVERY
-#### ```PORT: 8761```
+### DISCOVERY ```PORT: 8761```
 The Eureka server. The front desk. 
 It's a running program whose entire job is to hold a live list: service name → current address.
 
 
-### GATEWAY
-#### ```PORT: 8080```
+### GATEWAY  ```PORT: 8080```
 The single front door where Angular will eventually talk to, which routes incoming requests to the right service and (later) checks auth, handles CORS, etc.
 
 
-### MONGODB via docker compose
-#### ```MONGODB AT :27017```
+#### MONGODB via docker compose ```port :27017```
 docker compose.yml file for mongo db configs without having to download any dependencies
 
 
-### USER
-#### ```PORT: 8081```
+### USER ```PORT: 8081```
 where we handle user and auth requests.
 
 
@@ -42,5 +42,4 @@ The name is misleading because we're not doing username/password auth here; we a
 We're just using this class as the container to tell Spring "this request belongs to this user with these roles."
 
 
-### genereate random secret key 
-```openssl rand -base64 32```
+#### genereate random secret key ```openssl rand -base64 32```
