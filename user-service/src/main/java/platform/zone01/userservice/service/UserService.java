@@ -10,7 +10,7 @@ import platform.zone01.userservice.entity.User;
 import platform.zone01.userservice.exception.EmailAlreadyExistsException;
 import platform.zone01.userservice.exception.InvalidCredentialsException;
 import platform.zone01.userservice.exception.UserNotFoundException;
-import platform.zone01.userservice.jwt.JwtService;
+import platform.zone01.commonsecurity.jwt.JwtService;
 import platform.zone01.userservice.repository.UserRepository;
 
 @Service
@@ -49,7 +49,7 @@ public class UserService {
             throw new InvalidCredentialsException();
         }
 
-        String token = jwtService.generateToken(user);
+        String token = jwtService.generateToken(user.getId(), user.getRole().name());
         return new AuthResponseDTO(token);
     }
 
