@@ -7,5 +7,20 @@ services:
     volumes:
       - mongo-data:/data/db   # persist data so it survives container restarts
 
+  minio:
+    image: minio/minio:latest
+    container_name: buy01-minio
+    ports:
+      - "9000:9000"     # the S3 API port (services talks to this)
+      - "9001:9001"     # the web console (open in browser)
+    environment:
+      MINIO_ROOT_USER: minioadmin          # access key (like an S3 username)
+      MINIO_ROOT_PASSWORD: minioadmin       # secret key — change for anything real
+    command:
+      server /data --console-address ":9001"
+    volumes:
+      - minio-data:/data                    # persists objects across restarts
+
 volumes:
   mongo-data:
+  minio-data:
