@@ -15,24 +15,23 @@
     <artifactId>buy-01</artifactId>
     <version>0.0.1-SNAPSHOT</version>
 
-    <!-- THIS is what makes it a parent coordinator, not an app -->
+    <!-- parent coordinator -->
     <packaging>pom</packaging>
 
-    <!-- The list of child modules.  -->
+    <!-- child modules list -->
     <modules>
         <module>discovery</module>
         <module>gateway</module>
         <module>user-service</module>
         <module>common-security</module>
+        <module>product-service</module>
     </modules>
 
     <properties>
         <java.version>21</java.version>
-        <!-- Spring Cloud version line -->
         <spring-cloud.version>2023.0.3</spring-cloud.version>
     </properties>
 
-    <!-- "here are versions IF a child asks", not forced on anyone -->
     <dependencyManagement>
         <dependencies>
             <dependency>

@@ -27,6 +27,28 @@ The single front door where Angular will eventually talk to, which routes incomi
 #### MONGODB via docker compose ```port :27017```
 docker compose.yml file for mongo db configs without having to download any dependencies
 
+### MONGODB SHELL
+get into the shell
+```docker exec -it buy01-mongo mongosh```
+
+see all databases
+```show dbs```
+
+switch into a database
+```use userdb```
+
+list tables (while in 'use userdb')
+```show collections```
+
+show records ```db.users.find().pretty()```
+
+
+how many products ```db.products.countDocuments()```
+
+all products owned by one seller ```db.products.find({ userId: "paste-a-seller-id" }) ```
+
+only sellers ```db.users.find({ role: "SELLER" }).pretty()```
+
 
 ### USER ```PORT: 8081```
 where we handle user and auth requests.
@@ -46,3 +68,8 @@ We're just using this class as the container to tell Spring "this request belong
 
 
 #### genereate random secret key ```openssl rand -base64 32```
+
+ ```@AuthenticationPrincipal ``` the controller pulls the authenticated caller's id out of the security context 
+ (JwtAuthFilter is set as the principal) and passes it into the 
+ service as a separate argument (it does not come from the request body).
+ 
