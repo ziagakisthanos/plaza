@@ -6,7 +6,7 @@ spring:
     name: user-service
   data:
     mongodb:
-      uri: mongodb://localhost:27017/userdb   # db name
+      uri: mongodb://localhost:27017/userdb   # user db name
       auto-index-creation: true
 
 eureka:

@@ -6,7 +6,7 @@ spring:
     name: product-service
   data:
     mongodb:
-      uri: mongodb://localhost:27017/productdb     # db name
+      uri: mongodb://localhost:27017/productdb     # product db name
       auto-index-creation: true
 
 eureka:

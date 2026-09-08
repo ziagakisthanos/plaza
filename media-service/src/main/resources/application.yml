@@ -1,0 +1,31 @@
+server:
+  port: 8083
+
+spring:
+  application:
+    name: media-service
+  data:
+    mongodb:
+      uri: mongodb://localhost:27017/mediadb    # media db name
+      auto-index-creation: true
+  servlet:
+    multipart:
+      max-file-size: 2MB
+      max-request-size: 2MB
+
+eureka:
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+
+jwt:
+  secret: ${JWT_SECRET}
+  expiration: 3600000
+
+minio:
+  url: http://localhost:9000        # S3 API port
+  access-key: minioadmin
+  secret-key: minioadmin
+  bucket: product-images
