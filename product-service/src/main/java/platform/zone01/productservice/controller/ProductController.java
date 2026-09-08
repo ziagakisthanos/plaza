@@ -1,15 +1,12 @@
 package platform.zone01.productservice.controller;
 
 import jakarta.validation.Valid;
-import jakarta.ws.rs.Path;
-import org.apache.coyote.Response;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import platform.zone01.productservice.dto.ProductRequestDTO;
 import platform.zone01.productservice.dto.ProductResponseDTO;
-import platform.zone01.productservice.entity.Product;
 import platform.zone01.productservice.service.ProductService;
 
 import java.util.List;
