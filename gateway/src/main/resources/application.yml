@@ -6,6 +6,19 @@ spring:
     name: gateway
   cloud:
     gateway:
+      globalcors:
+        cors-configurations:
+          '[/**]': # all routes
+            allowed-origins: "http://localhost:4200"    # frontend
+            allowed-methods:
+              - GET
+              - POST
+              - PUT
+              - DELETE
+              - OPTIONS
+            allowed-headers: "*"
+            allow-credentials: true
+            max-age: 3600
       routes:
         - id: user-service
           uri: lb://USER-SERVICE
