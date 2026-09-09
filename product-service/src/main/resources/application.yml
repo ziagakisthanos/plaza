@@ -8,6 +8,11 @@ spring:
     mongodb:
       uri: mongodb://localhost:27017/productdb     # product db name
       auto-index-creation: true
+  kafka:
+    bootstrap-servers: localhost:9092    # Kafka address
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
 
 eureka:
   client:

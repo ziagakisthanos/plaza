@@ -5,6 +5,8 @@ import io.minio.GetObjectArgs;
 import io.minio.MinioClient;
 import io.minio.PutObjectArgs;
 import io.minio.RemoveObjectArgs;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import platform.zone01.mediaservice.dto.MediaFileDTO;
@@ -18,9 +20,11 @@ import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URLConnection;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
+@Slf4j
 @Service
 public class MediaService {
 
@@ -104,6 +108,25 @@ public class MediaService {
         }
 
         mediaRepository.delete(media);
+    }
+
+    public void deleteImagesEventTrigger(String productId) {
+        List<Media> mediaList = mediaRepository.findByProductId(productId);
+
+        for (Media media : mediaList) {
+            try {
+                minioClient.removeObject(
+                        RemoveObjectArgs.builder()
+                                .bucket(props.bucket())
+                                .object(media.getImagePath())
+                                .build());
+            } catch (Exception e) {
+                log.error("Failed to remove {} from MinIO", media.getImagePath(), e);
+            }
+        }
+
+        mediaRepository.deleteAll(mediaList);
+        log.info("Cleaned up {} images for deleted product {}", mediaList.size(), productId);
     }
 
     private String validateImage(MultipartFile file) {

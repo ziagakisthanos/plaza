@@ -1,5 +1,6 @@
 package platform.zone01.productservice.service;
 
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import platform.zone01.productservice.dto.ProductRequestDTO;
 import platform.zone01.productservice.dto.ProductResponseDTO;
@@ -14,9 +15,13 @@ import java.util.List;
 public class ProductService {
 
     private final ProductRepository productRepository;
+    private final KafkaTemplate<String, String> kafkaTemplate;
 
-    public ProductService(ProductRepository productRepository) {
+    private static final String PRODUCT_DELETED = "product-deleted";
+
+    public ProductService(ProductRepository productRepository, KafkaTemplate<String, String> kafkaTemplate) {
         this.productRepository = productRepository;
+        this.kafkaTemplate = kafkaTemplate;
     }
 
     public List<ProductResponseDTO> getAllProducts() {
@@ -69,6 +74,8 @@ public class ProductService {
         }
 
         productRepository.delete(product);
+
+        kafkaTemplate.send(PRODUCT_DELETED, id);
     }
 
     private ProductResponseDTO toResponseDTO(Product product) {

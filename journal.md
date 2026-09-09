@@ -77,3 +77,13 @@ We're just using this class as the container to tell Spring "this request belong
  (JwtAuthFilter is set as the principal) and passes it into the 
  service as a separate argument (it does not come from the request body).
  
+## Kafka
+
+After adding the kafka dependency in the services we need events to watch
+Kafka is then managed by Spring Boot BOM so no version is needed.
+
+**Kafka Spring Support annotations**
+- **KafkaTemplate** (for producing)
+- **KafkaListener** (for consuming)
+
+
