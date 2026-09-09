@@ -1,0 +1,67 @@
+<div class="register-container">
+    <mat-card class="register-card">
+        <mat-card-header>
+            <mat-card-title>Sign Up</mat-card-title>
+        </mat-card-header>
+
+        <mat-card-content>
+            <form [formGroup]="form" (ngSubmit)="onSubmit()">
+                <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>Name</mat-label>
+                    <input matInput formControlName="name" />
+                    @if (form.get('name')?.hasError('required') && form.get('name')?.touched) {
+                    <mat-error>Name is required</mat-error>
+                    }
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>Email</mat-label>
+                    <input matInput type="email" formControlName="email" />
+                    @if (form.get('email')?.hasError('required') && form.get('email')?.touched) {
+                    <mat-error>Email is required</mat-error>
+                    }
+                    @if (form.get('email')?.hasError('email')) {
+                    <mat-error>Enter a valid email</mat-error>
+                    }
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>Password</mat-label>
+                    <input matInput type="password" formControlName="password" />
+                    @if (form.get('password')?.hasError('required') && form.get('password')?.touched) {
+                    <mat-error>Password is required</mat-error>
+                    }
+                    @if (form.get('password')?.hasError('minlength')) {
+                    <mat-error>Password must be at least 6 characters</mat-error>
+                    }
+                    @if (form.get('password')?.hasError('maxlength')) {
+                    <mat-error>Password must be at most 20 characters</mat-error>
+                    }
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>I want to register as</mat-label>
+                    <mat-select formControlName="role">
+                        <mat-option value="CLIENT">Client (buyer)</mat-option>
+                        <mat-option value="SELLER">Seller</mat-option>
+                    </mat-select>
+                    @if (form.get('role')?.hasError('required') && form.get('role')?.touched) {
+                    <mat-error>Please select a role</mat-error>
+                    }
+                </mat-form-field>
+
+                @if (errorMessage) {
+                <p class="error-message">{{ errorMessage }}</p>
+                }
+
+                <button mat-raised-button color="primary" type="submit" [disabled]="form.invalid" class="full-width">
+                    Sign Up
+                </button>
+            </form>
+
+            <p class="login-link">
+                Already have an account? <a routerLink="/login">Sign in</a>
+            </p>
+        </mat-card-content>
+    </mat-card>
+</div>
