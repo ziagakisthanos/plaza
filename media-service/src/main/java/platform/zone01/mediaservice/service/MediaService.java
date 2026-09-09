@@ -1,15 +1,16 @@
 package platform.zone01.mediaservice.service;
 
 
+import io.minio.GetObjectArgs;
 import io.minio.MinioClient;
 import io.minio.PutObjectArgs;
+import io.minio.RemoveObjectArgs;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import platform.zone01.mediaservice.dto.MediaFileDTO;
 import platform.zone01.mediaservice.dto.MediaResponseDTO;
 import platform.zone01.mediaservice.entity.Media;
-import platform.zone01.mediaservice.exception.InvalidImageException;
-import platform.zone01.mediaservice.exception.MaxUploadSizeExceededException;
-import platform.zone01.mediaservice.exception.MediaStorageException;
+import platform.zone01.mediaservice.exception.*;
 import platform.zone01.mediaservice.minio.MinioProperties;
 import platform.zone01.mediaservice.repository.MediaRepository;
 
@@ -30,13 +31,29 @@ public class MediaService {
     private static final Set<String> ALLOWED_TYPES =
             Set.of("image/jpeg", "image/png");
 
-    private static final long MAX_SIZE = 2 * 1024 * 1024; // 2 MB
+    private static final long MAX_SIZE = 2 * 1024 * 1024; // 2 mb
 
     public MediaService(MinioClient minioClient, MinioProperties props,
                         MediaRepository mediaRepository) {
         this.minioClient = minioClient;
         this.props = props;
         this.mediaRepository = mediaRepository;
+    }
+
+    public MediaFileDTO getImage(String id) {
+        Media media = mediaRepository.findById(id)
+                .orElseThrow(() -> new MediaNotFoundException("Media not found: " + id));
+        try {
+            InputStream stream = minioClient.getObject(
+                    GetObjectArgs.builder()
+                            .bucket(props.bucket())
+                            .object(media.getImagePath())
+                            .build());
+            byte[] bytes = stream.readAllBytes();
+            return new MediaFileDTO(bytes, media.getContentType());
+        } catch (Exception e) {
+            throw new MediaStorageException("Failed to retrieve image");
+        }
     }
 
     public MediaResponseDTO uploadImage(MultipartFile file, String productId, String userId) {
@@ -66,6 +83,27 @@ public class MediaService {
         Media saved = mediaRepository.save(media);
 
         return toDTO(saved);
+    }
+
+    public void deleteImage(String id, String userId) {
+        Media media = mediaRepository.findById(id)
+                .orElseThrow(() -> new MediaNotFoundException("Media not found: " + id));
+
+        if(!media.getUserId().equals(userId)) {
+            throw new NotMediaOwnerException("You can only delete your own media");
+        }
+
+        try {
+            minioClient.removeObject(
+                    RemoveObjectArgs.builder()
+                            .bucket(props.bucket())
+                            .object(media.getImagePath())
+                            .build());
+        } catch (Exception e) {
+            throw new MediaStorageException("Failed to delete image from storage");
+        }
+
+        mediaRepository.delete(media);
     }
 
     private String validateImage(MultipartFile file) {
@@ -101,7 +139,7 @@ public class MediaService {
         return new MediaResponseDTO(
                 media.getId(),
                 media.getProductId(),
-                "media/images/" + media.getId()
+                "/media/images/" + media.getId()
         );
     }
 }

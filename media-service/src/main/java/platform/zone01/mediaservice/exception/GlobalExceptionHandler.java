@@ -48,10 +48,19 @@ public class GlobalExceptionHandler {
         return  errorResponse(HttpStatus.INTERNAL_SERVER_ERROR, ex.getMessage(), request);
     }
 
+    @ExceptionHandler(MediaNotFoundException.class)
+    public ResponseEntity<ErrorResponseDTO> handleMediaNotFoundException(MediaNotFoundException ex, HttpServletRequest request) {
+        return errorResponse(HttpStatus.NOT_FOUND, ex.getMessage(), request);
+    }
+
+    @ExceptionHandler(NotMediaOwnerException.class)
+    public ResponseEntity<ErrorResponseDTO> handleNotProductOwnerException(NotMediaOwnerException ex, HttpServletRequest request) {
+        return  errorResponse(HttpStatus.FORBIDDEN, ex.getMessage(), request);
+    }
+
     @ExceptionHandler(MaxUploadSizeExceededException.class)
-    public ResponseEntity<ErrorResponseDTO> handleMaxSize(MaxUploadSizeExceededException ex,
-                                                          HttpServletRequest request) {
-        return errorResponse(HttpStatus.BAD_REQUEST, "File exceeds the 2 MB limit", request);
+    public ResponseEntity<ErrorResponseDTO> handleMaxSize(MaxUploadSizeExceededException ex, HttpServletRequest request) {
+        return errorResponse(HttpStatus.BAD_REQUEST, ex.getMessage(), request);
     }
 
     private ResponseEntity<ErrorResponseDTO> errorResponse(HttpStatus status, String message, HttpServletRequest request) {

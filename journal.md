@@ -29,25 +29,29 @@ docker compose.yml file for mongo db configs without having to download any depe
 
 ### MONGODB SHELL
 get into the shell
-```docker exec -it buy01-mongo mongosh```
+- ```docker exec -it buy01-mongo mongosh```
 
 see all databases
-```show dbs```
+- ```show dbs```
 
 switch into a database
-```use userdb```
+- ```use userdb```
 
 list tables (while in 'use userdb')
-```show collections```
+- ```show collections```
 
-show records ```db.users.find().pretty()```
+show records 
+- ```db.users.find().pretty()```
 
 
-how many products ```db.products.countDocuments()```
+how many products 
+- ```db.products.countDocuments()```
 
-all products owned by one seller ```db.products.find({ userId: "paste-a-seller-id" }) ```
+all products owned by one seller 
+- ```db.products.find({ userId: "paste-a-seller-id" }) ```
 
-only sellers ```db.users.find({ role: "SELLER" }).pretty()```
+only sellers 
+- ```db.users.find({ role: "SELLER" }).pretty()```
 
 
 ### USER ```PORT: 8081```

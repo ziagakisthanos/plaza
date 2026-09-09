@@ -1,16 +1,17 @@
 package platform.zone01.mediaservice.controller;
 
-import org.apache.coyote.Response;
+import org.springframework.http.CacheControl;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import platform.zone01.mediaservice.dto.MediaFileDTO;
 import platform.zone01.mediaservice.dto.MediaResponseDTO;
 import platform.zone01.mediaservice.service.MediaService;
+
+import java.time.Duration;
 
 @RestController
 @RequestMapping("/media")
@@ -20,6 +21,15 @@ public class MediaController {
 
     public MediaController(MediaService mediaService) {
         this.mediaService = mediaService;
+    }
+
+    @GetMapping("/images/{id}")
+    public ResponseEntity<byte []> getImage(@PathVariable String id) {
+        MediaFileDTO file = mediaService.getImage(id);
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType(file.contentType()))
+                .cacheControl(CacheControl.maxAge(Duration.ofDays(30)).cachePublic())
+                .body(file.bytes());
     }
 
     @PostMapping("/images")
@@ -32,4 +42,11 @@ public class MediaController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
+    @DeleteMapping("/images/{id}")
+    public ResponseEntity<Void> deleteImage(
+            @PathVariable String id,
+            @AuthenticationPrincipal String userId) {
+        mediaService.deleteImage(id, userId);
+        return ResponseEntity.noContent().build();
+    }
 }
