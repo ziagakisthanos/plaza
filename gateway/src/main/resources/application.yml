@@ -4,6 +4,27 @@ server:
 spring:
   application:
     name: gateway
+  cloud:
+    gateway:
+      routes:
+        - id: user-service
+          uri: lb://USER-SERVICE
+          predicates:
+            - Path=/auth/**,/users/**
+
+        - id: product-service
+          uri: lb://PRODUCT-SERVICE
+          predicates:
+            - Path=/products/**
+
+        - id: media-service
+          uri: lb://MEDIA-SERVICE
+          predicates:
+            - Path=/media/**
+
+      discovery:
+        locator:
+          enabled: false
 
 eureka:
   client:
@@ -11,3 +32,5 @@ eureka:
     fetch-registry: true          # default value
     service-url:
       defaultZone: http://localhost:8761/eureka/
+  instance:
+    hostname: localhost
