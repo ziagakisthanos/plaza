@@ -905,25 +905,8 @@ textarea.input {
   font-size: 1.15rem;
 }
 
-.auth-stats {
-  display: flex;
-  gap: 2.5rem;
-  padding-top: 1.75rem;
+.auth-rule {
   border-top: 1px solid rgb(255 255 255 / 0.16);
-}
-
-.auth-stats strong {
-  display: block;
-  font-size: 1.5rem;
-  font-weight: 700;
-  letter-spacing: -0.03em;
-}
-
-.auth-stats span {
-  color: rgb(255 255 255 / 0.6);
-  font-size: 0.8rem;
-  letter-spacing: 0.03em;
-  text-transform: uppercase;
 }
 
 .auth-main {
