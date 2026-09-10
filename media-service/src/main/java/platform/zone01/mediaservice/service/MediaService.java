@@ -59,6 +59,12 @@ public class MediaService {
         }
     }
 
+    public List<MediaResponseDTO> getImageForProduct(String productId) {
+        return mediaRepository.findByProductId(productId).stream()
+                .map(this::toDTO)
+                .toList();
+    }
+
     public MediaResponseDTO uploadImage(MultipartFile file, String productId, String userId) {
         String contentType = validateImage(file);
 

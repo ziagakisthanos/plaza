@@ -1,0 +1,37 @@
+<div class="profile-container">
+  <mat-card class="profile-card">
+    <mat-card-header>
+      <mat-card-title>My Profile</mat-card-title>
+    </mat-card-header>
+
+    <mat-card-content>
+      <!-- big avatar preview -->
+      <div class="current-avatar">
+        <img [src]="'avatars/avatar-' + selectedAvatar() + '.svg'" alt="avatar" />
+      </div>
+
+      <div class="randomize-row">
+        <button mat-raised-button color="accent" type="button" (click)="randomizeAvatar()">
+          🎲 Randomize Avatar
+        </button>
+      </div>
+
+      <form [formGroup]="form" (ngSubmit)="onSave()">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Name</mat-label>
+          <input matInput formControlName="name" />
+          @if (form.get('name')?.hasError('required') && form.get('name')?.touched) {
+            <mat-error>Name is required</mat-error>
+          }
+        </mat-form-field>
+
+        @if (message()) { <p class="success">{{ message() }}</p> }
+        @if (error()) { <p class="error">{{ error() }}</p> }
+
+        <button mat-raised-button color="primary" type="submit" [disabled]="form.invalid" class="full-width">
+          Save Profile
+        </button>
+      </form>
+    </mat-card-content>
+  </mat-card>
+</div>

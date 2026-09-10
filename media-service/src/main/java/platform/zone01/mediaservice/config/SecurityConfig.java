@@ -38,7 +38,7 @@ public class SecurityConfig {
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(HttpMethod.GET, "/media/images/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/media/images/**", "/media/product/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/media/images/**").hasRole("SELLER")
                         .requestMatchers(HttpMethod.DELETE, "/media/images/**").hasRole("SELLER")
                         .anyRequest().authenticated()

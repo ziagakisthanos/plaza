@@ -1,0 +1,32 @@
+.profile-container {
+  display: flex;
+  justify-content: center;
+  padding: 2rem;
+}
+.profile-card {
+  max-width: 440px;
+  width: 100%;
+}
+.current-avatar {
+  display: flex;
+  justify-content: center;
+  margin: 1rem 0;
+}
+.current-avatar img {
+  width: 130px;
+  height: 130px;
+  border-radius: 50%;
+  border: 3px solid #1976d2;
+}
+.randomize-row {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 1.5rem;
+}
+.full-width {
+  width: 100%;
+  margin-bottom: 0.5rem;
+}
+.success { color: #43a047; margin: 0.5rem 0; }
+.error { color: #d32f2f; margin: 0.5rem 0; }
+ 

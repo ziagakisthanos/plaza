@@ -11,6 +11,11 @@
     <div class="product-grid">
         @for (product of products(); track product.id) {
         <mat-card class="product-card">
+            @if (product.imageUrl) {
+                <img [src]="product.imageUrl" [alt]="product.name" class="product-image" />
+            } @else {
+                <div class="no-image">No image</div>
+            }
             <mat-card-header>
                 <mat-card-title>{{ product.name }}</mat-card-title>
             </mat-card-header>

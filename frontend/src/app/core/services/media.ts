@@ -21,4 +21,8 @@ export class MediaService {
   imageUrl(id: string): string {
     return `${this.apiUrl}/media/images/${id}`;
   }
+
+  getImagesForProduct(productId: string): Observable<MediaResponse[]> {
+  return this.http.get<MediaResponse[]>(`${this.apiUrl}/media/product/${productId}`);
+}
 }

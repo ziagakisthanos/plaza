@@ -5,6 +5,8 @@ import { ProductList } from './features/products/product-list/product-list';
 import { SellerDashboard } from './features/dashboard/seller-dashboard/seller-dashboard';
 import { authGuard } from './core/guards/auth-guard';
 import { roleGuard } from './core/guards/role-guard';
+import { Profile } from './features/profile/profile/profile';
+
 
 export const routes: Routes = [
     { path: 'login', component: Login },
@@ -15,6 +17,7 @@ export const routes: Routes = [
         component: SellerDashboard,
         canActivate: [authGuard, roleGuard],
     },
+    { path: 'profile', component: Profile, canActivate: [authGuard] },
 
     { path: '', redirectTo: 'products', pathMatch: 'full' }, // default
 ];

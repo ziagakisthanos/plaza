@@ -2,10 +2,7 @@ package platform.zone01.userservice.service;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import platform.zone01.userservice.dto.AuthResponseDTO;
-import platform.zone01.userservice.dto.LoginRequestDTO;
-import platform.zone01.userservice.dto.RegisterRequestDTO;
-import platform.zone01.userservice.dto.UserResponseDTO;
+import platform.zone01.userservice.dto.*;
 import platform.zone01.userservice.entity.User;
 import platform.zone01.userservice.exception.EmailAlreadyExistsException;
 import platform.zone01.userservice.exception.InvalidCredentialsException;
@@ -57,6 +54,16 @@ public class UserService {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new UserNotFoundException(id));
         return toResponseDTO(user);
+    }
+
+    public UserResponseDTO updateProfile(UpdateProfileRequestDTO request, String userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException(userId));
+        user.setName(request.getName());
+        user.setAvatar(request.getAvatar());
+
+        User saved = userRepository.save(user);
+        return toResponseDTO(saved);
     }
 
     private UserResponseDTO toResponseDTO(User user) {

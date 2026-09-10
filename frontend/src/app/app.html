@@ -1,1 +1,19 @@
+<mat-toolbar color="primary">
+  <span class="brand" routerLink="/products" style="cursor: pointer;">buy-01</span>
+  <span class="spacer"></span>
+
+  <a mat-button routerLink="/products">Products</a>
+
+  @if (isLoggedIn()) {
+    <a mat-button routerLink="/profile">Profile</a>
+    @if (isSeller()) {
+      <a mat-button routerLink="/dashboard">Dashboard</a>
+    }
+    <button mat-button (click)="logout()">Logout</button>
+  } @else {
+    <a mat-button routerLink="/login">Login</a>
+    <a mat-button routerLink="/register">Register</a>
+  }
+</mat-toolbar>
+
 <router-outlet />

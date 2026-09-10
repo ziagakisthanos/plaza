@@ -12,6 +12,7 @@ import platform.zone01.mediaservice.dto.MediaResponseDTO;
 import platform.zone01.mediaservice.service.MediaService;
 
 import java.time.Duration;
+import java.util.List;
 
 @RestController
 @RequestMapping("/media")
@@ -30,6 +31,11 @@ public class MediaController {
                 .contentType(MediaType.parseMediaType(file.contentType()))
                 .cacheControl(CacheControl.maxAge(Duration.ofDays(30)).cachePublic())
                 .body(file.bytes());
+    }
+
+    @GetMapping("/product/{productId}")
+    public ResponseEntity<List<MediaResponseDTO>> getImageForProduct(@PathVariable String productId) {
+        return ResponseEntity.ok(mediaService.getImageForProduct(productId));
     }
 
     @PostMapping("/images")
