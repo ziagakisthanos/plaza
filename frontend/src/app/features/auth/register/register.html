@@ -1,67 +1,180 @@
-<div class="register-container">
-    <mat-card class="register-card">
-        <mat-card-header>
-            <mat-card-title>Sign Up</mat-card-title>
-        </mat-card-header>
+<div class="auth-shell">
+  <aside class="auth-aside">
+    <a class="auth-brand" routerLink="/products">
+      <app-brand-mark tone="light" [size]="32" />
+      <span>buy<span style="opacity: 0.6">01</span></span>
+    </a>
 
-        <mat-card-content>
-            <form [formGroup]="form" (ngSubmit)="onSubmit()">
-                <mat-form-field appearance="outline" class="full-width">
-                    <mat-label>Name</mat-label>
-                    <input matInput formControlName="name" />
-                    @if (form.get('name')?.hasError('required') && form.get('name')?.touched) {
-                    <mat-error>Name is required</mat-error>
-                    }
-                </mat-form-field>
+    <div class="auth-pitch">
+      <h2>Start buying — or start selling — today.</h2>
+      <p>
+        One account, two ways to use it. Browse the marketplace as a buyer, or open your own
+        storefront in minutes.
+      </p>
 
-                <mat-form-field appearance="outline" class="full-width">
-                    <mat-label>Email</mat-label>
-                    <input matInput type="email" formControlName="email" />
-                    @if (form.get('email')?.hasError('required') && form.get('email')?.touched) {
-                    <mat-error>Email is required</mat-error>
-                    }
-                    @if (form.get('email')?.hasError('email')) {
-                    <mat-error>Enter a valid email</mat-error>
-                    }
-                </mat-form-field>
+      <ul class="auth-points">
+        <li>
+          <span class="material-icons">shopping_bag</span>Buyers: discover products from real makers
+        </li>
+        <li>
+          <span class="material-icons">storefront</span>Sellers: publish, price and manage stock
+        </li>
+        <li><span class="material-icons">lock</span>Your data stays yours</li>
+      </ul>
+    </div>
 
-                <mat-form-field appearance="outline" class="full-width">
-                    <mat-label>Password</mat-label>
-                    <input matInput type="password" formControlName="password" />
-                    @if (form.get('password')?.hasError('required') && form.get('password')?.touched) {
-                    <mat-error>Password is required</mat-error>
-                    }
-                    @if (form.get('password')?.hasError('minlength')) {
-                    <mat-error>Password must be at least 6 characters</mat-error>
-                    }
-                    @if (form.get('password')?.hasError('maxlength')) {
-                    <mat-error>Password must be at most 20 characters</mat-error>
-                    }
-                </mat-form-field>
+    <div class="auth-stats">
+      <div><strong>Free</strong><span>To join</span></div>
+      <div><strong>2 min</strong><span>Setup</span></div>
+      <div><strong>0%</strong><span>Listing fee</span></div>
+    </div>
+  </aside>
 
-                <mat-form-field appearance="outline" class="full-width">
-                    <mat-label>I want to register as</mat-label>
-                    <mat-select formControlName="role">
-                        <mat-option value="CLIENT">Client (buyer)</mat-option>
-                        <mat-option value="SELLER">Seller</mat-option>
-                    </mat-select>
-                    @if (form.get('role')?.hasError('required') && form.get('role')?.touched) {
-                    <mat-error>Please select a role</mat-error>
-                    }
-                </mat-form-field>
+  <main class="auth-main">
+    <div class="auth-card rise-in">
+      <a class="auth-mobile-brand" routerLink="/products">
+        <app-brand-mark [size]="30" />
+        <span>buy01</span>
+      </a>
 
-                @if (errorMessage) {
-                <p class="error-message">{{ errorMessage }}</p>
-                }
+      <header class="auth-head">
+        <h1>Create your account</h1>
+        <p>Tell us how you plan to use buy-01 and we'll set things up.</p>
+      </header>
 
-                <button mat-raised-button color="primary" type="submit" [disabled]="form.invalid" class="full-width">
-                    Sign Up
-                </button>
-            </form>
+      <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
+        <fieldset class="role-picker">
+          <legend class="field-label">I'm joining as</legend>
 
-            <p class="login-link">
-                Already have an account? <a routerLink="/login">Sign in</a>
-            </p>
-        </mat-card-content>
-    </mat-card>
+          <div class="choice-grid">
+            <button
+              type="button"
+              class="choice"
+              [class.selected]="isRole('CLIENT')"
+              [attr.aria-pressed]="isRole('CLIENT')"
+              (click)="selectRole('CLIENT')"
+            >
+              <span class="choice-check material-icons">check_circle</span>
+              <span class="choice-icon material-icons">shopping_bag</span>
+              <span class="choice-title">I am a buyer</span>
+              <span class="choice-sub">Browse and buy from independent sellers</span>
+            </button>
+
+            <button
+              type="button"
+              class="choice"
+              [class.selected]="isRole('SELLER')"
+              [attr.aria-pressed]="isRole('SELLER')"
+              (click)="selectRole('SELLER')"
+            >
+              <span class="choice-check material-icons">check_circle</span>
+              <span class="choice-icon material-icons">storefront</span>
+              <span class="choice-title">I am a seller</span>
+              <span class="choice-sub">List products and manage your storefront</span>
+            </button>
+          </div>
+
+          @if (invalid('role')) {
+            <span class="field-error">Pick one to continue</span>
+          }
+        </fieldset>
+
+        <div class="field">
+          <label for="name">Full name</label>
+          <input
+            id="name"
+            class="input"
+            [class.is-invalid]="invalid('name')"
+            type="text"
+            autocomplete="name"
+            placeholder="Jane Doe"
+            formControlName="name"
+          />
+          @if (invalid('name')) {
+            <span class="field-error">Name is required</span>
+          }
+        </div>
+
+        <div class="field">
+          <label for="email">Email address</label>
+          <input
+            id="email"
+            class="input"
+            [class.is-invalid]="invalid('email')"
+            type="email"
+            autocomplete="email"
+            placeholder="you@example.com"
+            formControlName="email"
+          />
+          @if (invalid('email')) {
+            <span class="field-error">
+              {{
+                form.get('email')?.hasError('required')
+                  ? 'Email is required'
+                  : 'Enter a valid email address'
+              }}
+            </span>
+          }
+        </div>
+
+        <div class="field">
+          <label for="password">Password</label>
+          <div class="input-group">
+            <input
+              id="password"
+              class="input"
+              [class.is-invalid]="invalid('password')"
+              [type]="showPassword() ? 'text' : 'password'"
+              autocomplete="new-password"
+              placeholder="6–20 characters"
+              formControlName="password"
+            />
+            <button
+              class="input-affix"
+              type="button"
+              (click)="togglePassword()"
+              [attr.aria-label]="showPassword() ? 'Hide password' : 'Show password'"
+            >
+              <span class="material-icons">{{
+                showPassword() ? 'visibility_off' : 'visibility'
+              }}</span>
+            </button>
+          </div>
+
+          @if (form.value.password) {
+            <div class="strength" [attr.data-score]="passwordStrength()">
+              <span class="bar"></span><span class="bar"></span><span class="bar"></span>
+              <span class="strength-label">{{ strengthLabel() }}</span>
+            </div>
+          }
+
+          @if (invalid('password')) {
+            <span class="field-error">
+              {{
+                form.get('password')?.hasError('maxlength')
+                  ? 'Password must be at most 20 characters'
+                  : 'Password must be 6–20 characters'
+              }}
+            </span>
+          }
+        </div>
+
+        @if (errorMessage()) {
+          <div class="alert alert-error" role="alert">
+            <span class="material-icons">error_outline</span>{{ errorMessage() }}
+          </div>
+        }
+
+        <button class="btn btn-primary btn-lg btn-block" type="submit" [disabled]="loading()">
+          @if (loading()) {
+            <span class="spinner"></span>Creating account…
+          } @else {
+            Create account
+          }
+        </button>
+      </form>
+
+      <p class="auth-foot">Already have an account? <a routerLink="/login">Sign in</a></p>
+    </div>
+  </main>
 </div>

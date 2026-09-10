@@ -4,10 +4,24 @@ import { Observable, tap } from 'rxjs';
 import { jwtDecode } from 'jwt-decode';
 import { environment } from '../../../environments/environment';
 
-interface LoginRequest { email: string; password: string; }
-interface RegisterRequest { name: string; email: string; password: string; role: string; }
-interface AuthResponse { token: string; }
-interface JwtPayload { sub: string; role: string; exp: number; }
+interface LoginRequest {
+  email: string;
+  password: string;
+}
+interface RegisterRequest {
+  name: string;
+  email: string;
+  password: string;
+  role: string;
+}
+interface AuthResponse {
+  token: string;
+}
+interface JwtPayload {
+  sub: string;
+  role: string;
+  exp: number;
+}
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
@@ -17,10 +31,9 @@ export class AuthService {
 
   // --- LOGIN ---
   login(credentials: LoginRequest): Observable<AuthResponse> {
-    return this.http.post<AuthResponse>(`${this.apiUrl}/auth/login`, credentials)
-      .pipe(
-        tap(response => this.storeToken(response.token))
-      );
+    return this.http
+      .post<AuthResponse>(`${this.apiUrl}/auth/login`, credentials)
+      .pipe(tap((response) => this.storeToken(response.token)));
   }
 
   // --- REGISTER ---
@@ -67,7 +80,7 @@ export class AuthService {
     try {
       return jwtDecode<JwtPayload>(token);
     } catch {
-      return null;   // malformed token
+      return null; // malformed token
     }
   }
 }

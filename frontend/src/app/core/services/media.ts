@@ -3,7 +3,11 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 
-export interface MediaResponse { id: string; productId: string; url: string; }
+export interface MediaResponse {
+  id: string;
+  productId: string;
+  url: string;
+}
 
 @Injectable({ providedIn: 'root' })
 export class MediaService {
@@ -23,6 +27,6 @@ export class MediaService {
   }
 
   getImagesForProduct(productId: string): Observable<MediaResponse[]> {
-  return this.http.get<MediaResponse[]>(`${this.apiUrl}/media/product/${productId}`);
-}
+    return this.http.get<MediaResponse[]>(`${this.apiUrl}/media/product/${productId}`);
+  }
 }

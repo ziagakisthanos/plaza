@@ -29,6 +29,6 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
       // 403 = authenticated but not allowed (e.g. CLIENT hitting seller route)
       // we let that propagate so the component can show a message; no redirect
       return throwError(() => error);
-    })
+    }),
   );
 };

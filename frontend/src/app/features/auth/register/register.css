@@ -1,0 +1,143 @@
+/* Layout comes from the shared .auth-* shell in styles.css. */
+
+.role-picker {
+  margin: 0 0 1.35rem;
+  padding: 0;
+  border: 0;
+}
+
+.role-picker legend {
+  padding: 0;
+}
+
+.choice-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+}
+
+.choice {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.15rem;
+  padding: 1rem 0.95rem;
+  border: 1.5px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    border-color 0.16s ease,
+    background-color 0.16s ease,
+    box-shadow 0.16s ease,
+    transform 0.12s ease;
+}
+
+.choice:hover {
+  border-color: var(--brand-300);
+  background: var(--brand-50);
+  transform: translateY(-1px);
+}
+
+.choice.selected {
+  border-color: var(--brand-600);
+  background: var(--brand-50);
+  box-shadow: var(--ring);
+}
+
+.choice-icon {
+  margin-bottom: 0.45rem;
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border-radius: var(--radius-xs);
+  background: var(--ink-100);
+  color: var(--ink-600);
+  font-size: 1.3rem;
+  transition:
+    background-color 0.16s ease,
+    color 0.16s ease;
+}
+
+.choice.selected .choice-icon {
+  background: var(--brand-600);
+  color: #fff;
+}
+
+.choice-title {
+  color: var(--ink-900);
+  font-size: 0.98rem;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+}
+
+.choice-sub {
+  color: var(--ink-500);
+  font-size: 0.79rem;
+  line-height: 1.35;
+}
+
+.choice-check {
+  position: absolute;
+  top: 0.6rem;
+  right: 0.6rem;
+  color: var(--brand-600);
+  font-size: 1.2rem;
+  opacity: 0;
+  transform: scale(0.7);
+  transition:
+    opacity 0.16s ease,
+    transform 0.16s ease;
+}
+
+.choice.selected .choice-check {
+  opacity: 1;
+  transform: none;
+}
+
+/* --- password strength --------------------------------------------------- */
+
+.strength {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  margin-top: 0.5rem;
+}
+
+.strength .bar {
+  height: 4px;
+  flex: 1 1 0;
+  border-radius: var(--radius-pill);
+  background: var(--ink-200);
+  transition: background-color 0.2s ease;
+}
+
+.strength-label {
+  margin-left: 0.35rem;
+  min-width: 6.5ch;
+  color: var(--ink-500);
+  font-size: 0.76rem;
+  font-weight: 600;
+}
+
+.strength[data-score='1'] .bar:nth-child(1) {
+  background: var(--danger-600);
+}
+
+.strength[data-score='2'] .bar:nth-child(-n + 2) {
+  background: var(--accent-500);
+}
+
+.strength[data-score='3'] .bar {
+  background: var(--success-600);
+}
+
+@media (max-width: 420px) {
+  .choice-grid {
+    grid-template-columns: 1fr;
+  }
+}

@@ -25,11 +25,19 @@ export class ProductService {
     return this.http.get<Product>(`${this.apiUrl}/products/${id}`);
   }
 
-  create(product: { name: string; description: string; price: number; quantity: number }): Observable<Product> {
+  create(product: {
+    name: string;
+    description: string;
+    price: number;
+    quantity: number;
+  }): Observable<Product> {
     return this.http.post<Product>(`${this.apiUrl}/products`, product);
   }
 
-  update(id: string, product: { name: string; description: string; price: number; quantity: number }): Observable<Product> {
+  update(
+    id: string,
+    product: { name: string; description: string; price: number; quantity: number },
+  ): Observable<Product> {
     return this.http.put<Product>(`${this.apiUrl}/products/${id}`, product);
   }
 

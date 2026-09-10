@@ -1,74 +1,254 @@
-<div class="dashboard-container">
-    <h1>Seller Dashboard</h1>
-
-    <!-- Create product form -->
-    <mat-card class="form-card">
-        <mat-card-header><mat-card-title>{{ editingId() ? 'Edit Product' : 'Add a Product' }}</mat-card-title></mat-card-header>
-        <mat-card-content>
-            <form [formGroup]="productForm" (ngSubmit)="onSubmit()">
-                <mat-form-field appearance="outline" class="full-width">
-                    <mat-label>Name</mat-label>
-                    <input matInput formControlName="name" />
-                </mat-form-field>
-
-                <mat-form-field appearance="outline" class="full-width">
-                    <mat-label>Description</mat-label>
-                    <input matInput formControlName="description" />
-                </mat-form-field>
-
-                <mat-form-field appearance="outline" class="full-width">
-                    <mat-label>Price</mat-label>
-                    <input matInput type="number" step="0.01" formControlName="price" />
-                    @if (productForm.get('price')?.hasError('min')) {
-                    <mat-error>Price must be greater than 0</mat-error>
-                    }
-                </mat-form-field>
-
-                <mat-form-field appearance="outline" class="full-width">
-                    <mat-label>Quantity</mat-label>
-                    <input matInput type="number" formControlName="quantity" />
-                </mat-form-field>
-
-                <button mat-raised-button color="primary" type="submit" [disabled]="productForm.invalid">
-                    {{ editingId() ? 'Update' : 'Add Product' }}
-                </button>
-                @if (editingId()) {
-                    <button mat-button type="button" (click)="cancelEdit()">Cancel</button>
-                }
-            </form>
-        </mat-card-content>
-    </mat-card>
-
-    @if (errorMessage()) {
-    <p class="error">{{ errorMessage() }}</p>
-    }
-
-    <!-- My products list -->
-    <h2>My Products</h2>
-    @if (loading()) {
-    <p>Loading...</p>
-    } @else if (myProducts().length === 0) {
-    <p>You haven't added any products yet.</p>
-    } @else {
-    <div class="product-grid">
-        @for (product of myProducts(); track product.id) {
-        <mat-card class="product-card">
-            <mat-card-header><mat-card-title>{{ product.name }}</mat-card-title></mat-card-header>
-            <mat-card-content>
-                <p>{{ product.description }}</p>
-                <p class="price">${{ product.price }}</p>
-                <p>In stock: {{ product.quantity }}</p>
-            </mat-card-content>
-            <mat-card-actions>
-                <button mat-button (click)="startEdit(product)">Edit</button>
-                <button mat-button color="warn" (click)="onDelete(product.id)">Delete</button>
-            </mat-card-actions>
-            <mat-card-content>
-                <input type="file" accept="image/*" (change)="onFileSelected($event)" />
-                <button mat-button color="primary" (click)="uploadImage(product.id)">Upload Image</button>
-            </mat-card-content>
-        </mat-card>
-        }
+<div class="page">
+  <header class="page-head">
+    <div>
+      <span class="eyebrow">Seller workspace</span>
+      <h1>Your storefront</h1>
+      <p class="subtitle">
+        Add products, keep stock accurate and give every listing an image that sells it.
+      </p>
     </div>
+    <button class="btn btn-primary" type="button" (click)="openCreate()">
+      <span class="material-icons icon">add</span>New product
+    </button>
+  </header>
+
+  <input
+    #fileInput
+    class="visually-hidden"
+    type="file"
+    accept="image/*"
+    (change)="onFileSelected($event)"
+  />
+
+  @if (successMessage()) {
+    <div class="alert alert-success rise-in" role="status">
+      <span class="material-icons">check_circle</span>{{ successMessage() }}
+    </div>
+  }
+  @if (errorMessage()) {
+    <div class="alert alert-error" role="alert">
+      <span class="material-icons">error_outline</span>{{ errorMessage() }}
+    </div>
+  }
+
+  <!-- headline numbers -->
+  <section class="stat-grid">
+    <div class="stat">
+      <span class="stat-icon material-icons">inventory_2</span>
+      <span class="stat-value">{{ totalProducts() }}</span>
+      <span class="stat-label">Listings</span>
+    </div>
+    <div class="stat">
+      <span class="stat-icon material-icons">layers</span>
+      <span class="stat-value">{{ totalStock() }}</span>
+      <span class="stat-label">Units in stock</span>
+    </div>
+    <div class="stat">
+      <span class="stat-icon material-icons">payments</span>
+      <span class="stat-value">{{ inventoryValue() | currency: 'USD' }}</span>
+      <span class="stat-label">Inventory value</span>
+    </div>
+    <div class="stat" [class.attention]="outOfStock() > 0">
+      <span class="stat-icon material-icons">report</span>
+      <span class="stat-value">{{ outOfStock() }}</span>
+      <span class="stat-label">Out of stock</span>
+    </div>
+  </section>
+
+  <div class="section-head">
+    <h2>My products</h2>
+    @if (!loading() && myProducts().length) {
+      <span class="badge badge-neutral">{{ myProducts().length }} total</span>
     }
+  </div>
+
+  @if (loading()) {
+    <div class="product-grid">
+      @for (n of [1, 2, 3]; track n) {
+        <div class="product-card">
+          <div class="skeleton" style="height: 170px; border-radius: 0"></div>
+          <div class="card-body">
+            <div class="skeleton" style="height: 16px; width: 70%; margin-bottom: 10px"></div>
+            <div class="skeleton" style="height: 12px; width: 90%"></div>
+          </div>
+        </div>
+      }
+    </div>
+  } @else if (myProducts().length === 0) {
+    <div class="empty-state">
+      <span class="material-icons">add_business</span>
+      <h3>No products yet</h3>
+      <p>Your storefront is empty. Add your first product and it will appear in the marketplace.</p>
+      <button class="btn btn-primary" type="button" (click)="openCreate()" style="margin-top: 1rem">
+        <span class="material-icons icon">add</span>Add your first product
+      </button>
+    </div>
+  } @else {
+    <div class="product-grid">
+      @for (product of myProducts(); track product.id) {
+        <article class="product-card rise-in">
+          <div class="media">
+            @if (product.imageUrl) {
+              <img [src]="product.imageUrl" [alt]="product.name" />
+            } @else {
+              <div class="media-empty">
+                <span class="material-icons">image</span>
+                <span>No image yet</span>
+              </div>
+            }
+            @if (product.quantity === 0) {
+              <span class="badge badge-danger stock-flag">Out of stock</span>
+            } @else if (product.quantity <= 5) {
+              <span class="badge badge-warning stock-flag">Low stock</span>
+            }
+          </div>
+
+          <div class="card-body">
+            <h3 class="product-name">{{ product.name }}</h3>
+            <p class="product-desc">{{ product.description || 'No description' }}</p>
+            <div class="price-row">
+              <span class="price">{{ product.price | currency: 'USD' }}</span>
+              <span class="stock">{{ product.quantity }} in stock</span>
+            </div>
+          </div>
+
+          <div class="card-actions">
+            <button class="btn btn-secondary btn-sm" type="button" (click)="startEdit(product)">
+              <span class="material-icons icon">edit</span>Edit
+            </button>
+            <button
+              class="btn btn-ghost btn-sm"
+              type="button"
+              (click)="chooseImage(product.id, fileInput)"
+            >
+              <span class="material-icons icon">photo_camera</span>Image
+            </button>
+            <button
+              class="btn btn-danger btn-sm delete-btn"
+              type="button"
+              (click)="askDelete(product.id)"
+              aria-label="Delete product"
+            >
+              <span class="material-icons icon">delete_outline</span>
+            </button>
+          </div>
+
+          @if (uploadingFor() === product.id && selectedFile()) {
+            <div class="upload-bar">
+              <span class="material-icons">attachment</span>
+              <span class="file-name">{{ selectedFile()!.name }}</span>
+              <button class="btn btn-primary btn-sm" type="button" (click)="uploadImage()">
+                Upload
+              </button>
+              <button class="btn btn-ghost btn-sm" type="button" (click)="cancelUpload()">
+                Cancel
+              </button>
+            </div>
+          }
+        </article>
+      }
+    </div>
+  }
 </div>
+
+<!-- create / edit drawer -->
+@if (panelOpen()) {
+  <div class="overlay" (click)="closePanel()"></div>
+  <aside class="drawer" role="dialog" aria-modal="true" aria-label="Product details">
+    <header class="drawer-head">
+      <h2>{{ editingId() ? 'Edit product' : 'New product' }}</h2>
+      <button class="icon-btn" type="button" (click)="closePanel()" aria-label="Close">
+        <span class="material-icons">close</span>
+      </button>
+    </header>
+
+    <form class="drawer-body" [formGroup]="productForm" (ngSubmit)="onSubmit()" novalidate>
+      <div class="field">
+        <label for="p-name">Product name</label>
+        <input
+          id="p-name"
+          class="input"
+          [class.is-invalid]="invalid('name')"
+          type="text"
+          placeholder="e.g. Hand-thrown ceramic mug"
+          formControlName="name"
+        />
+        @if (invalid('name')) {
+          <span class="field-error">Name is required</span>
+        }
+      </div>
+
+      <div class="field">
+        <label for="p-desc">Description</label>
+        <textarea
+          id="p-desc"
+          class="input"
+          rows="4"
+          placeholder="What makes it worth buying?"
+          formControlName="description"
+        ></textarea>
+        <span class="field-hint">Optional, but listings with a description convert better.</span>
+      </div>
+
+      <div class="form-row">
+        <div class="field">
+          <label for="p-price">Price (USD)</label>
+          <input
+            id="p-price"
+            class="input"
+            [class.is-invalid]="invalid('price')"
+            type="number"
+            step="0.01"
+            min="0.01"
+            placeholder="0.00"
+            formControlName="price"
+          />
+          @if (invalid('price')) {
+            <span class="field-error">Enter a price above 0</span>
+          }
+        </div>
+
+        <div class="field">
+          <label for="p-qty">Quantity</label>
+          <input
+            id="p-qty"
+            class="input"
+            [class.is-invalid]="invalid('quantity')"
+            type="number"
+            min="0"
+            placeholder="0"
+            formControlName="quantity"
+          />
+          @if (invalid('quantity')) {
+            <span class="field-error">Enter a quantity of 0 or more</span>
+          }
+        </div>
+      </div>
+
+      <div class="drawer-foot">
+        <button class="btn btn-secondary" type="button" (click)="closePanel()">Cancel</button>
+        <button class="btn btn-primary" type="submit" [disabled]="saving()">
+          @if (saving()) {
+            <span class="spinner"></span>Saving…
+          } @else {
+            {{ editingId() ? 'Save changes' : 'Add product' }}
+          }
+        </button>
+      </div>
+    </form>
+  </aside>
+}
+
+<!-- delete confirmation -->
+@if (deletingId()) {
+  <div class="overlay" (click)="cancelDelete()"></div>
+  <div class="confirm" role="alertdialog" aria-modal="true">
+    <span class="confirm-icon material-icons">delete_outline</span>
+    <h3>Delete this product?</h3>
+    <p>“{{ deleteTarget()?.name }}” will be removed from the marketplace. This can't be undone.</p>
+    <div class="confirm-actions">
+      <button class="btn btn-secondary" type="button" (click)="cancelDelete()">Keep it</button>
+      <button class="btn btn-danger" type="button" (click)="confirmDelete()">Delete product</button>
+    </div>
+  </div>
+}

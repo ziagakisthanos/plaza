@@ -1,19 +1,92 @@
-<mat-toolbar color="primary">
-  <span class="brand" routerLink="/products" style="cursor: pointer;">buy-01</span>
-  <span class="spacer"></span>
+@if (!chromeless()) {
+  <header class="site-header">
+    <div class="header-inner">
+      <a class="brand" routerLink="/products" aria-label="buy-01 home">
+        <app-brand-mark />
+        <span class="brand-word">buy<span class="brand-dot">01</span></span>
+      </a>
 
-  <a mat-button routerLink="/products">Products</a>
+      <button
+        class="nav-toggle"
+        type="button"
+        (click)="toggleMobileNav()"
+        [attr.aria-expanded]="mobileNavOpen()"
+        aria-label="Toggle navigation"
+      >
+        <span class="material-icons">{{ mobileNavOpen() ? 'close' : 'menu' }}</span>
+      </button>
 
-  @if (isLoggedIn()) {
-    <a mat-button routerLink="/profile">Profile</a>
-    @if (isSeller()) {
-      <a mat-button routerLink="/dashboard">Dashboard</a>
-    }
-    <button mat-button (click)="logout()">Logout</button>
-  } @else {
-    <a mat-button routerLink="/login">Login</a>
-    <a mat-button routerLink="/register">Register</a>
-  }
-</mat-toolbar>
+      <nav class="main-nav" [class.open]="mobileNavOpen()">
+        <a routerLink="/products" routerLinkActive="active">
+          <span class="material-icons">storefront</span>Marketplace
+        </a>
+        @if (isLoggedIn() && isSeller()) {
+          <a routerLink="/dashboard" routerLinkActive="active">
+            <span class="material-icons">insights</span>Dashboard
+          </a>
+        }
+        @if (isLoggedIn()) {
+          <a routerLink="/profile" routerLinkActive="active" class="nav-mobile-only">
+            <span class="material-icons">person</span>Profile
+          </a>
+        }
+      </nav>
 
-<router-outlet />
+      <div class="header-actions">
+        @if (isLoggedIn()) {
+          <div class="account">
+            <button
+              class="account-trigger"
+              type="button"
+              (click)="toggleMenu()"
+              [attr.aria-expanded]="menuOpen()"
+            >
+              <img class="avatar" [src]="avatarUrl()" alt="" />
+              <span class="account-text">
+                <span class="account-name">{{ displayName() }}</span>
+                <span class="account-role">{{ roleLabel() }}</span>
+              </span>
+              <span class="material-icons chevron">expand_more</span>
+            </button>
+
+            @if (menuOpen()) {
+              <div class="account-menu rise-in" role="menu">
+                <a routerLink="/profile" role="menuitem">
+                  <span class="material-icons">person</span>My profile
+                </a>
+                @if (isSeller()) {
+                  <a routerLink="/dashboard" role="menuitem">
+                    <span class="material-icons">inventory_2</span>My products
+                  </a>
+                }
+                <div class="menu-divider"></div>
+                <button type="button" class="danger" role="menuitem" (click)="logout()">
+                  <span class="material-icons">logout</span>Sign out
+                </button>
+              </div>
+            }
+          </div>
+        } @else {
+          <a class="btn btn-ghost btn-sm" routerLink="/login">Sign in</a>
+          <a class="btn btn-primary btn-sm" routerLink="/register">Get started</a>
+        }
+      </div>
+    </div>
+  </header>
+}
+
+<main [class.with-chrome]="!chromeless()">
+  <router-outlet />
+</main>
+
+@if (!chromeless()) {
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <span>© 2026 buy-01 — built for makers and the people who buy from them.</span>
+      <span class="footer-links">
+        <a routerLink="/products">Marketplace</a>
+        <a routerLink="/register">Become a seller</a>
+      </span>
+    </div>
+  </footer>
+}

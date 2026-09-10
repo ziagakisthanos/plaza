@@ -1,20 +1,10 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { MatCardModule } from '@angular/material/card';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatButtonModule } from '@angular/material/button';
-import { UserService } from '../../../core/services/user';
+import { UserProfile, UserService } from '../../../core/services/user';
 
 @Component({
   selector: 'app-profile',
-  imports: [
-    ReactiveFormsModule,
-    MatCardModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatButtonModule,
-  ],
+  imports: [ReactiveFormsModule],
   templateUrl: './profile.html',
   styleUrl: './profile.css',
 })
@@ -22,8 +12,12 @@ export class Profile implements OnInit {
   private userService = inject(UserService);
   private fb = inject(FormBuilder);
 
-  private readonly avatarIds = ['1', '2', '3', '4', '5'];
+  readonly avatarIds = ['1', '2', '3', '4', '5'];
+
+  profile = signal<UserProfile | null>(null);
   selectedAvatar = signal<string>('1');
+  loading = signal(true);
+  saving = signal(false);
   message = signal('');
   error = signal('');
 
@@ -34,33 +28,69 @@ export class Profile implements OnInit {
   ngOnInit(): void {
     this.userService.getMe().subscribe({
       next: (profile) => {
+        this.profile.set(profile);
         this.form.patchValue({ name: profile.name });
         this.selectedAvatar.set(profile.avatar ?? '1');
+        this.loading.set(false);
       },
-      error: () => this.error.set('Failed to load profile'),
+      error: () => {
+        this.error.set('Failed to load your profile');
+        this.loading.set(false);
+      },
     });
   }
 
-  // pick a random avatar, avoiding current
+  avatarSrc(id: string): string {
+    return `avatars/avatar-${id}.svg`;
+  }
+
+  selectAvatar(id: string): void {
+    this.selectedAvatar.set(id);
+  }
+
+  /** Picks a different avatar than the one currently shown. */
   randomizeAvatar(): void {
-    let next = this.selectedAvatar();
-    while (next === this.selectedAvatar()) {
-      next = this.avatarIds[Math.floor(Math.random() * this.avatarIds.length)];
-    }
-    this.selectedAvatar.set(next);
+    const others = this.avatarIds.filter((id) => id !== this.selectedAvatar());
+    this.selectedAvatar.set(others[Math.floor(Math.random() * others.length)]);
+  }
+
+  roleLabel(): string {
+    return this.profile()?.role === 'SELLER' ? 'Seller' : 'Buyer';
+  }
+
+  initials(): string {
+    const name = this.profile()?.name ?? '';
+    return name
+      .split(' ')
+      .filter(Boolean)
+      .slice(0, 2)
+      .map((part) => part[0].toUpperCase())
+      .join('');
   }
 
   onSave(): void {
-    if (this.form.invalid) return;
+    if (this.form.invalid) {
+      this.form.markAllAsTouched();
+      return;
+    }
+
     this.message.set('');
     this.error.set('');
+    this.saving.set(true);
 
-    this.userService.updateProfile({
-      name: this.form.value.name!,
-      avatar: this.selectedAvatar(),
-    }).subscribe({
-      next: () => this.message.set('Profile updated!'),
-      error: () => this.error.set('Failed to update profile'),
-    });
+    this.userService
+      .updateProfile({ name: this.form.value.name!, avatar: this.selectedAvatar() })
+      .subscribe({
+        next: (profile) => {
+          this.profile.set(profile);
+          this.saving.set(false);
+          this.message.set('Profile updated');
+          setTimeout(() => this.message.set(''), 3200);
+        },
+        error: () => {
+          this.saving.set(false);
+          this.error.set('Failed to update your profile');
+        },
+      });
   }
 }

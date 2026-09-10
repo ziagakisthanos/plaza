@@ -1,42 +1,107 @@
-<div class="login-container">
-    <mat-card class="login-card">
-        <mat-card-header>
-            <mat-card-title>Sign In</mat-card-title>
-        </mat-card-header>
+<div class="auth-shell">
+  <aside class="auth-aside">
+    <a class="auth-brand" routerLink="/products">
+      <app-brand-mark tone="light" [size]="32" />
+      <span>buy<span style="opacity: 0.6">01</span></span>
+    </a>
 
-        <mat-card-content>
-            <form [formGroup]="form" (ngSubmit)="onSubmit()">
-                <mat-form-field appearance="outline" class="full-width">
-                    <mat-label>Email</mat-label>
-                    <input matInput type="email" formControlName="email" />
-                    @if (form.get('email')?.hasError('required')) {
-                    <mat-error>Email is required</mat-error>
-                    }
-                    @if (form.get('email')?.hasError('email')) {
-                    <mat-error>Enter a valid email</mat-error>
-                    }
-                </mat-form-field>
+    <div class="auth-pitch">
+      <h2>Where independent sellers meet real buyers.</h2>
+      <p>Sign in to pick up where you left off — your listings, your orders, your storefront.</p>
 
-                <mat-form-field appearance="outline" class="full-width">
-                    <mat-label>Password</mat-label>
-                    <input matInput type="password" formControlName="password" />
-                    @if (form.get('password')?.hasError('required')) {
-                    <mat-error>Password is required</mat-error>
-                    }
-                </mat-form-field>
+      <ul class="auth-points">
+        <li><span class="material-icons">bolt</span>List a product in under a minute</li>
+        <li><span class="material-icons">verified_user</span>Secure, token-based sessions</li>
+        <li><span class="material-icons">photo_library</span>Rich imagery on every listing</li>
+      </ul>
+    </div>
 
-                @if (errorMessage) {
-                <p class="error-message">{{ errorMessage }}</p>
-                }
+    <div class="auth-stats">
+      <div><strong>2.4k</strong><span>Listings</span></div>
+      <div><strong>480</strong><span>Sellers</span></div>
+      <div><strong>99.9%</strong><span>Uptime</span></div>
+    </div>
+  </aside>
 
-                <button mat-raised-button color="primary" type="submit" [disabled]="form.invalid" class="full-width">
-                    Sign In
-                </button>
-            </form>
+  <main class="auth-main">
+    <div class="auth-card rise-in">
+      <a class="auth-mobile-brand" routerLink="/products">
+        <app-brand-mark [size]="30" />
+        <span>buy01</span>
+      </a>
 
-            <p class="signup-link">
-                Don't have an account? <a routerLink="/register">Sign up</a>
-            </p>
-        </mat-card-content>
-    </mat-card>
+      <header class="auth-head">
+        <h1>Welcome back</h1>
+        <p>Sign in to your buy-01 account to continue.</p>
+      </header>
+
+      <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
+        <div class="field">
+          <label for="email">Email address</label>
+          <input
+            id="email"
+            class="input"
+            [class.is-invalid]="invalid('email')"
+            type="email"
+            autocomplete="email"
+            placeholder="you@example.com"
+            formControlName="email"
+          />
+          @if (invalid('email')) {
+            <span class="field-error">
+              {{
+                form.get('email')?.hasError('required')
+                  ? 'Email is required'
+                  : 'Enter a valid email address'
+              }}
+            </span>
+          }
+        </div>
+
+        <div class="field">
+          <label for="password">Password</label>
+          <div class="input-group">
+            <input
+              id="password"
+              class="input"
+              [class.is-invalid]="invalid('password')"
+              [type]="showPassword() ? 'text' : 'password'"
+              autocomplete="current-password"
+              placeholder="Enter your password"
+              formControlName="password"
+            />
+            <button
+              class="input-affix"
+              type="button"
+              (click)="togglePassword()"
+              [attr.aria-label]="showPassword() ? 'Hide password' : 'Show password'"
+            >
+              <span class="material-icons">{{
+                showPassword() ? 'visibility_off' : 'visibility'
+              }}</span>
+            </button>
+          </div>
+          @if (invalid('password')) {
+            <span class="field-error">Password is required</span>
+          }
+        </div>
+
+        @if (errorMessage()) {
+          <div class="alert alert-error" role="alert">
+            <span class="material-icons">error_outline</span>{{ errorMessage() }}
+          </div>
+        }
+
+        <button class="btn btn-primary btn-lg btn-block" type="submit" [disabled]="loading()">
+          @if (loading()) {
+            <span class="spinner"></span>Signing in…
+          } @else {
+            Sign in
+          }
+        </button>
+      </form>
+
+      <p class="auth-foot">New to buy-01? <a routerLink="/register">Create an account</a></p>
+    </div>
+  </main>
 </div>

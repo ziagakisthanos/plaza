@@ -1,37 +1,110 @@
-<div class="profile-container">
-  <mat-card class="profile-card">
-    <mat-card-header>
-      <mat-card-title>My Profile</mat-card-title>
-    </mat-card-header>
+<div class="page profile-page">
+  <header class="page-head">
+    <div>
+      <span class="eyebrow">Account</span>
+      <h1>My profile</h1>
+      <p class="subtitle">How you appear to other people on buy-01.</p>
+    </div>
+  </header>
 
-    <mat-card-content>
-      <!-- big avatar preview -->
-      <div class="current-avatar">
-        <img [src]="'avatars/avatar-' + selectedAvatar() + '.svg'" alt="avatar" />
-      </div>
+  @if (loading()) {
+    <div class="card card-pad">
+      <div class="skeleton" style="height: 96px; width: 96px; border-radius: 50%"></div>
+      <div class="skeleton" style="height: 16px; width: 45%; margin-top: 1.25rem"></div>
+      <div class="skeleton" style="height: 46px; width: 100%; margin-top: 1rem"></div>
+    </div>
+  } @else {
+    <div class="profile-layout">
+      <!-- identity summary -->
+      <aside class="card identity">
+        <div class="identity-cover"></div>
+        <img class="identity-avatar" [src]="avatarSrc(selectedAvatar())" alt="Your avatar" />
+        <div class="identity-body">
+          <h2>{{ profile()?.name || initials() }}</h2>
+          <p class="identity-email">{{ profile()?.email }}</p>
+          <span
+            class="badge"
+            [class.badge-success]="profile()?.role === 'SELLER'"
+            [class.badge-neutral]="profile()?.role !== 'SELLER'"
+          >
+            <span class="material-icons" style="font-size: 0.95rem">
+              {{ profile()?.role === 'SELLER' ? 'storefront' : 'shopping_bag' }}
+            </span>
+            {{ roleLabel() }}
+          </span>
+        </div>
+      </aside>
 
-      <div class="randomize-row">
-        <button mat-raised-button color="accent" type="button" (click)="randomizeAvatar()">
-          🎲 Randomize Avatar
-        </button>
-      </div>
+      <!-- editable details -->
+      <section class="card card-pad">
+        <h2 class="block-title">Profile picture</h2>
+        <p class="block-hint">Pick one of the buy-01 avatars, or let us surprise you.</p>
 
-      <form [formGroup]="form" (ngSubmit)="onSave()">
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Name</mat-label>
-          <input matInput formControlName="name" />
-          @if (form.get('name')?.hasError('required') && form.get('name')?.touched) {
-            <mat-error>Name is required</mat-error>
+        <div class="avatar-picker">
+          @for (id of avatarIds; track id) {
+            <button
+              type="button"
+              class="avatar-option"
+              [class.selected]="selectedAvatar() === id"
+              [attr.aria-pressed]="selectedAvatar() === id"
+              [attr.aria-label]="'Avatar ' + id"
+              (click)="selectAvatar(id)"
+            >
+              <img [src]="avatarSrc(id)" alt="" />
+            </button>
           }
-        </mat-form-field>
 
-        @if (message()) { <p class="success">{{ message() }}</p> }
-        @if (error()) { <p class="error">{{ error() }}</p> }
+          <button class="btn btn-secondary btn-sm dice" type="button" (click)="randomizeAvatar()">
+            <span class="material-icons icon">casino</span>Surprise me
+          </button>
+        </div>
 
-        <button mat-raised-button color="primary" type="submit" [disabled]="form.invalid" class="full-width">
-          Save Profile
-        </button>
-      </form>
-    </mat-card-content>
-  </mat-card>
+        <hr class="divider" />
+
+        <form [formGroup]="form" (ngSubmit)="onSave()" novalidate>
+          <h2 class="block-title">Account details</h2>
+
+          <div class="field">
+            <label for="name">Display name</label>
+            <input
+              id="name"
+              class="input"
+              [class.is-invalid]="form.get('name')!.invalid && form.get('name')!.touched"
+              type="text"
+              autocomplete="name"
+              formControlName="name"
+            />
+            @if (form.get('name')!.invalid && form.get('name')!.touched) {
+              <span class="field-error">Name is required</span>
+            }
+          </div>
+
+          <div class="field">
+            <label for="email">Email address</label>
+            <input id="email" class="input" type="email" [value]="profile()?.email" disabled />
+            <span class="field-hint">Your email is used to sign in and can't be changed here.</span>
+          </div>
+
+          @if (message()) {
+            <div class="alert alert-success rise-in" role="status">
+              <span class="material-icons">check_circle</span>{{ message() }}
+            </div>
+          }
+          @if (error()) {
+            <div class="alert alert-error" role="alert">
+              <span class="material-icons">error_outline</span>{{ error() }}
+            </div>
+          }
+
+          <button class="btn btn-primary" type="submit" [disabled]="saving()">
+            @if (saving()) {
+              <span class="spinner"></span>Saving…
+            } @else {
+              Save changes
+            }
+          </button>
+        </form>
+      </section>
+    </div>
+  }
 </div>

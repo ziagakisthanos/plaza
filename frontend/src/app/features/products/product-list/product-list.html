@@ -1,31 +1,159 @@
-<div class="products-container">
-    <h1>Products</h1>
-
-    @if (loading()) {
-    <p>Loading...</p>
-    } @else if (error()) {
-    <p class="error">{{ error() }}</p>
-    } @else if (products().length === 0) {
-    <p>No products available.</p>
-    } @else {
-    <div class="product-grid">
-        @for (product of products(); track product.id) {
-        <mat-card class="product-card">
-            @if (product.imageUrl) {
-                <img [src]="product.imageUrl" [alt]="product.name" class="product-image" />
-            } @else {
-                <div class="no-image">No image</div>
-            }
-            <mat-card-header>
-                <mat-card-title>{{ product.name }}</mat-card-title>
-            </mat-card-header>
-            <mat-card-content>
-                <p>{{ product.description }}</p>
-                <p class="price">${{ product.price }}</p>
-                <p class="stock">In stock: {{ product.quantity }}</p>
-            </mat-card-content>
-        </mat-card>
-        }
+@if (showSellerCta()) {
+  <section class="hero">
+    <div class="hero-inner">
+      <div class="hero-copy">
+        <span class="hero-eyebrow">The buy-01 marketplace</span>
+        <h1>Products from people who actually make them.</h1>
+        <p>
+          Browse listings from independent sellers, or open your own storefront and start selling in
+          a couple of minutes.
+        </p>
+        <div class="hero-actions">
+          <a class="btn btn-primary btn-lg" routerLink="/register">
+            <span class="material-icons icon">storefront</span>Start selling
+          </a>
+          <a class="btn btn-secondary btn-lg" routerLink="/login">Sign in</a>
+        </div>
+      </div>
+      <div class="hero-art" aria-hidden="true">
+        <div class="hero-tile t1"><span class="material-icons">local_mall</span></div>
+        <div class="hero-tile t2"><span class="material-icons">redeem</span></div>
+        <div class="hero-tile t3"><span class="material-icons">chair</span></div>
+        <div class="hero-tile t4"><span class="material-icons">watch</span></div>
+      </div>
     </div>
-    }
+  </section>
+}
+
+<div class="page">
+  <header class="page-head">
+    <div>
+      <span class="eyebrow">Marketplace</span>
+      <h1>Browse products</h1>
+      <p class="subtitle">Everything currently listed by sellers on buy-01.</p>
+    </div>
+  </header>
+
+  <!-- filter bar -->
+  <div class="toolbar">
+    <div class="search">
+      <span class="material-icons">search</span>
+      <input
+        class="input"
+        type="search"
+        placeholder="Search products…"
+        aria-label="Search products"
+        [value]="query()"
+        (input)="onSearch($event)"
+      />
+    </div>
+
+    <button
+      class="chip"
+      type="button"
+      [class.active]="inStockOnly()"
+      [attr.aria-pressed]="inStockOnly()"
+      (click)="toggleInStock()"
+    >
+      <span class="material-icons">check</span>In stock only
+    </button>
+
+    <label class="sort">
+      <span class="visually-hidden">Sort products</span>
+      <select class="input" (change)="setSort($event)">
+        @for (option of sorts; track option.key) {
+          <option [value]="option.key">{{ option.label }}</option>
+        }
+      </select>
+    </label>
+  </div>
+
+  @if (loading()) {
+    <div class="product-grid">
+      @for (n of [1, 2, 3, 4, 5, 6]; track n) {
+        <div class="product-card">
+          <div class="skeleton" style="aspect-ratio: 4 / 3; border-radius: 0"></div>
+          <div class="card-body">
+            <div class="skeleton" style="height: 16px; width: 65%; margin-bottom: 10px"></div>
+            <div class="skeleton" style="height: 12px; width: 95%; margin-bottom: 6px"></div>
+            <div class="skeleton" style="height: 12px; width: 45%"></div>
+          </div>
+        </div>
+      }
+    </div>
+  } @else if (error()) {
+    <div class="empty-state">
+      <span class="material-icons">cloud_off</span>
+      <h3>Something went wrong</h3>
+      <p>{{ error() }}</p>
+    </div>
+  } @else if (products().length === 0) {
+    <div class="empty-state">
+      <span class="material-icons">storefront</span>
+      <h3>The marketplace is empty</h3>
+      <p>No seller has listed a product yet. Be the first one to put something up for sale.</p>
+      <a class="btn btn-primary" routerLink="/register" style="margin-top: 1rem">
+        Become a seller
+      </a>
+    </div>
+  } @else if (visibleProducts().length === 0) {
+    <div class="empty-state">
+      <span class="material-icons">search_off</span>
+      <h3>No matches</h3>
+      <p>Nothing here matches your search. Try a different term or clear the filters.</p>
+      <button
+        class="btn btn-secondary"
+        type="button"
+        (click)="clearFilters()"
+        style="margin-top: 1rem"
+      >
+        Clear filters
+      </button>
+    </div>
+  } @else {
+    <p class="result-count">
+      {{ visibleProducts().length }}
+      {{ visibleProducts().length === 1 ? 'product' : 'products' }}
+      @if (isFiltered()) {
+        <button class="link-btn" type="button" (click)="clearFilters()">Clear filters</button>
+      }
+    </p>
+
+    <div class="product-grid">
+      @for (product of visibleProducts(); track product.id) {
+        <article class="product-card rise-in">
+          <div class="media">
+            @if (product.imageUrl) {
+              <img [src]="product.imageUrl" [alt]="product.name" loading="lazy" />
+            } @else {
+              <div class="media-empty">
+                <span class="material-icons">image</span>
+                <span>No image</span>
+              </div>
+            }
+            @if (product.quantity === 0) {
+              <span class="badge badge-danger stock-flag">Sold out</span>
+            } @else if (product.quantity <= 5) {
+              <span class="badge badge-warning stock-flag">Only {{ product.quantity }} left</span>
+            }
+          </div>
+
+          <div class="card-body">
+            <h3 class="product-name">{{ product.name }}</h3>
+            <p class="product-desc">{{ product.description || 'No description provided.' }}</p>
+            <div class="price-row">
+              <span class="price">{{ product.price | currency: 'USD' }}</span>
+              <span class="stock">
+                @if (product.quantity > 0) {
+                  {{ product.quantity }} in stock
+                } @else {
+                  Unavailable
+                }
+              </span>
+            </div>
+          </div>
+        </article>
+      }
+    </div>
+  }
 </div>
