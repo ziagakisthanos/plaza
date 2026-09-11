@@ -1,4 +1,5 @@
-# buy-01 — E-Commerce Microservices Platform
+## buy-01 E-Commerce Microservices Platform
+
 
 A full-stack e-commerce platform built with **Spring Boot microservices** (backend) and
 **Angular** (frontend). Users register as clients (browse) or sellers (manage products and
