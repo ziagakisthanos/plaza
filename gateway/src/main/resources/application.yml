@@ -1,5 +1,11 @@
 server:
-  port: 8080          # angular will hit this port
+  port: 8443          # HTTPS
+  ssl:
+    enabled: true
+    key-store: classpath:keystore.p12
+    key-store-password: changeit
+    key-store-type: PKCS12
+    key-alias: buy01
 
 spring:
   application:
@@ -9,7 +15,7 @@ spring:
       globalcors:
         cors-configurations:
           '[/**]': # all routes
-            allowed-origins: "http://localhost:4200"    # frontend
+            allowed-origins: "https://localhost:4200"    # frontend
             allowed-methods:
               - GET
               - POST
