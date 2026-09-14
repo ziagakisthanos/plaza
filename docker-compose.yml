@@ -112,6 +112,16 @@ services:
     networks:
       - buy01-net
 
+  frontend:
+    build: ./frontend          # points at frontend/Dockerfile
+    container_name: buy01-frontend
+    ports:
+      - "4200:80"              # host 4200 -> nginx port 80 in container
+    depends_on:
+      - gateway
+    networks:
+      - buy01-net
+
 volumes:
   mongo-data:
   minio-data:

@@ -68,6 +68,17 @@ public class MediaService {
     public MediaResponseDTO uploadImage(MultipartFile file, String productId, String userId) {
         String contentType = validateImage(file);
 
+        List<Media> existing = mediaRepository.findByProductId(productId);
+        for (Media old : existing) {
+            try {
+                minioClient.removeObject(RemoveObjectArgs.builder()
+                        .bucket(props.bucket()).object(old.getImagePath()).build());
+            } catch (Exception e) {
+                log.error("Failed to remove old image {}", old.getImagePath(), e);
+            }
+        }
+        mediaRepository.deleteAll(existing);
+
         String extension = contentType.equals("image/png") ? ".png" : ".jpg";
         String objectKey = UUID.randomUUID() + extension;
 
