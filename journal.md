@@ -103,3 +103,8 @@ keytool -genkeypair \
  ```
 
 - change SSL on the gateway .yml file to serve HTTPS port 8443 and add the cert
+
+### Build dockerized App
+```
+docker compose up --build -d
+```

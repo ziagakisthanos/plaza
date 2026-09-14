@@ -1,0 +1,12 @@
+spring:
+  data:
+    mongodb:
+      uri: mongodb://mongo:27017/productdb
+  kafka:
+    bootstrap-servers: kafka:29092              # "kafka" service, internal listener port
+eureka:
+  client:
+    service-url:
+      defaultZone: http://discovery:8761/eureka/
+  instance:
+    prefer-ip-address: true

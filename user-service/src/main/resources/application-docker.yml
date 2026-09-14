@@ -1,0 +1,10 @@
+spring:
+  data:
+    mongodb:
+      uri: mongodb://mongo:27017/userdb        # "mongo" = compose service name
+eureka:
+  client:
+    service-url:
+      defaultZone: http://discovery:8761/eureka/   # "discovery" = compose service name
+  instance:
+    prefer-ip-address: true
