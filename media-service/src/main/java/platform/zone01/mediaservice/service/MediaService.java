@@ -69,28 +69,16 @@ public class MediaService {
         String contentType = validateImage(file);
 
         List<Media> existing = mediaRepository.findByProductId(productId);
-        for (Media old : existing) {
-            try {
-                minioClient.removeObject(RemoveObjectArgs.builder()
-                        .bucket(props.bucket()).object(old.getImagePath()).build());
-            } catch (Exception e) {
-                log.error("Failed to remove old image {}", old.getImagePath(), e);
-            }
-        }
-        mediaRepository.deleteAll(existing);
 
         String extension = contentType.equals("image/png") ? ".png" : ".jpg";
         String objectKey = UUID.randomUUID() + extension;
-
         try {
-            minioClient.putObject(
-                    PutObjectArgs.builder()
-                            .bucket(props.bucket())
-                            .object(objectKey)
-                            .stream(file.getInputStream(), file.getSize(), -1)
-                            .contentType(contentType)
-                            .build()
-            );
+            minioClient.putObject(PutObjectArgs.builder()
+                    .bucket(props.bucket())
+                    .object(objectKey)
+                    .stream(file.getInputStream(), file.getSize(), -1)
+                    .contentType(contentType)
+                    .build());
         } catch (Exception e) {
             throw new MediaStorageException("Failed to store image");
         }
@@ -102,6 +90,7 @@ public class MediaService {
         media.setUserId(userId);
         Media saved = mediaRepository.save(media);
 
+        deleteMediaRecords(existing);
         return toDTO(saved);
     }
 
@@ -126,22 +115,23 @@ public class MediaService {
         mediaRepository.delete(media);
     }
 
-    public void deleteImagesEventTrigger(String productId) {
-        List<Media> mediaList = mediaRepository.findByProductId(productId);
-
+    private void deleteMediaRecords(List<Media> mediaList) {
         for (Media media : mediaList) {
             try {
-                minioClient.removeObject(
-                        RemoveObjectArgs.builder()
-                                .bucket(props.bucket())
-                                .object(media.getImagePath())
-                                .build());
+                minioClient.removeObject(RemoveObjectArgs.builder()
+                        .bucket(props.bucket())
+                        .object(media.getImagePath())
+                        .build());
             } catch (Exception e) {
                 log.error("Failed to remove {} from MinIO", media.getImagePath(), e);
             }
         }
-
         mediaRepository.deleteAll(mediaList);
+    }
+
+    public void deleteImagesEventTrigger(String productId) {
+        List<Media> mediaList = mediaRepository.findByProductId(productId);
+        deleteMediaRecords(mediaList);
         log.info("Cleaned up {} images for deleted product {}", mediaList.size(), productId);
     }
 
