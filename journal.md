@@ -117,3 +117,6 @@ docker exec jenkins cat /var/jenkins_home/secrets/initialAdminPassword
 
 Manage Jenkins → Credentials → Add Credentials
 Kind: Secret text, Secret: jwt secret
+
+user: thanosJenkins
+pass: jenkins1
