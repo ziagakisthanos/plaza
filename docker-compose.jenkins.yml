@@ -2,6 +2,7 @@ services:
   jenkins:
     build: ./jenkins
     container_name: jenkins
+    user: root
     ports:
       - "8090:8080"
       - "50000:50000"
