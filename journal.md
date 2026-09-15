@@ -91,15 +91,7 @@ Kafka is then managed by Spring Boot BOM so no version is needed.
 
 - generate a public or private key par and wrap it in a self-signed cert.
 ```
-keytool -genkeypair \
-  -alias buy01 \
-  -keyalg RSA \
-  -keysize 2048 \
-  -storetype PKCS12 \
-  -keystore keystore.p12 \
-  -validity 365 \
-  -dname "CN=localhost, OU=dev, O=buy01, L=City, ST=State, C=GR" \
-  -storepass changeit 
+keytool -genkeypair -alias buy01 -keyalg RSA -keysize 2048 -storetype PKCS12 -keystore keystore.p12 -validity 365 -dname "CN=localhost, OU=dev, O=buy01, L=City, ST=State, C=GR" -storepass changeit 
  ```
 
 - change SSL on the gateway .yml file to serve HTTPS port 8443 and add the cert
@@ -108,3 +100,20 @@ keytool -genkeypair \
 ```
 docker compose up --build -d
 ```
+
+## Jenkins ```PORT: 8090```
+
+run to get Jenkins container
+```
+docker compose -f docker-compose.jenkins.yml up -d
+```
+extract the initial jenkins admin password
+```
+docker exec jenkins cat /var/jenkins_home/secrets/initialAdminPassword
+```
+- search and get the correct docker group id if need ```stat -c '%g' /var/run/docker.sock```
+
+#### In Jenkins dashboard
+
+Manage Jenkins → Credentials → Add Credentials
+Kind: Secret text, Secret: jwt secret
