@@ -71,7 +71,9 @@ The name is misleading because we're not doing username/password auth here; we a
 We're just using this class as the container to tell Spring "this request belongs to this user with these roles."
 
 
-#### genereate random secret key ```openssl rand -base64 32```
+#### genereate random secret key 
+```openssl rand -base64 32```
+
 
  ```@AuthenticationPrincipal ``` the controller pulls the authenticated caller's id out of the security context 
  (JwtAuthFilter is set as the principal) and passes it into the 
@@ -111,7 +113,9 @@ extract the initial jenkins admin password
 ```
 docker exec jenkins cat /var/jenkins_home/secrets/initialAdminPassword
 ```
-- search and get the correct docker group id if need ```stat -c '%g' /var/run/docker.sock```
+search and get the correct docker group id if need 
+
+```stat -c '%g' /var/run/docker.sock```
 
 #### In Jenkins dashboard
 

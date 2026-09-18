@@ -11,7 +11,7 @@ services:
       - buy01-net
 
   minio:
-    image: minio/minio:latest
+    image: quay.io/minio/minio:latest
     container_name: buy01-minio
     ports:
       - "9000:9000"
