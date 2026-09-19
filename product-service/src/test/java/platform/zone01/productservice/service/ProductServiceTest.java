@@ -73,7 +73,7 @@ class ProductServiceTest {
         ProductResponseDTO result = productService.updateProduct(request, "prod-1", "owner-A");
 
         assertThat(result.getName()).isEqualTo("Updated name");
-        assertThat(result.getPrice()).isEqualTo(1.0);
+        assertThat(result.getPrice()).isEqualTo(2.0);
         assertThat(result.getDescription()).isEqualTo("new desc");
         assertThat(result.getQuantity()).isEqualTo(1);
         verify(productRepository).save(any(Product.class));
