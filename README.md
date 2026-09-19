@@ -51,7 +51,9 @@ and object storage.
 
 **Backend:** Java 21, Spring Boot 3.3, Spring Cloud (Eureka, Gateway), Spring Security,
 Spring Data MongoDB, Spring Kafka, jjwt, MinIO client, Maven (multi-module).
+
 **Frontend:** Angular 21 (standalone components), Angular Material, RxJS, TypeScript.
+
 **Infrastructure:** MongoDB, MinIO (S3-compatible object storage), Apache Kafka (KRaft),
 all via Docker.
 
