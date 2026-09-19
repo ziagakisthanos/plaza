@@ -186,6 +186,69 @@ Every service exposes `/actuator/health`.
 
 ---
 
+## CI/CD with Jenkins
+
+Jenkins runs in Docker (`jenkins/Dockerfile`: Jenkins LTS + Docker CLI + Compose plugin + Maven)
+and drives the pipeline defined in the root `Jenkinsfile`.
+
+### Start Jenkins
+```bash
+docker compose -f docker-compose.jenkins.yml up -d --build
+```
+- UI: http://localhost:8090
+- First boot only, unlock with:
+  `docker exec jenkins cat /var/jenkins_home/secrets/initialAdminPassword`
+  then install the suggested plugins and create an admin user.
+- Jenkins talks to the host's Docker daemon through the mounted `/var/run/docker.sock`.
+  `group_add: "999"` in `docker-compose.jenkins.yml` must match the host's docker group id
+  (`getent group docker`).
+- All Jenkins state (jobs, users, credentials, plugins) lives in the named volume
+  `mr-jenk_jenkins_home`. It survives restarts and rebuilds, but `docker compose down -v` or
+  `docker volume rm mr-jenk_jenkins_home` wipes it.
+
+### One-time Jenkins setup
+1. **Credentials** (Manage Jenkins > Credentials > Global):
+   - `jwt-secret` — *Secret text*, ID exactly `jwt-secret`, value = the `JWT_SECRET` used by the
+     services. The `Jenkinsfile` reads it with `credentials('jwt-secret')`; it is never hardcoded.
+   - A Git credential (username + password/token) for the repository.
+2. **Create the job**: New Item > *Pipeline* (e.g. `mrjenk-pipeline`) > Pipeline definition
+   *Pipeline script from SCM* > SCM *Git* > repository URL + the Git credential > branch
+   `*/main` > Script Path `Jenkinsfile`.
+3. **Run it once** with *Build Now*. This registers the polling trigger from the `Jenkinsfile`.
+4. **Permissions** (Manage Jenkins > Security): anonymous access is denied. Use
+   *Matrix-based security* to give an admin full rights and other users read-only, and disable
+   user sign-up.
+
+### Pipeline stages
+| Stage | What it does |
+|-------|--------------|
+| Checkout | `checkout scm` — fetches `origin/main` |
+| Build | `mvn clean package -DskipTests` for all modules |
+| Test | `mvn test`; JUnit results are published and archived. A failing test stops the pipeline |
+| Build Images | Tags each current `buy01-<service>` image as `:backup`, then `docker compose build` |
+| Deploy | `docker compose up -d`, waits, and fails if any service is not `running` |
+
+### Behaviour
+- **Automatic trigger:** the job polls the repository every ~2 minutes (`pollSCM`); a new commit
+  on `main` starts a build. No webhook is needed.
+- **Rollback:** if the pipeline fails after new images were built, the `:backup` images are
+  re-tagged as `:latest`, restoring the last known-good build.
+- **Cleanup:** after every run (pass or fail) the pipeline runs `docker compose down
+  --remove-orphans`, so nothing is left running. Named data volumes are kept.
+- **Notifications:** written to the build console log (status, job, build number, duration,
+  link) for success, failure/rollback, abort, and a `DEPLOYED` event after the smoke check.
+- **Test reports:** JUnit trend and per-build results in the Jenkins UI; the raw surefire reports
+  are archived with each build.
+- **Concurrency/retention:** one build at a time, 30-minute timeout, last 20 builds kept.
+
+### Notes
+- Stop your manual dev stack (`docker compose down`) before a pipeline run: services use fixed
+  `container_name`s (`buy01-*`), which would collide with the pipeline's containers.
+- Mounting `docker.sock` and running Jenkins as root gives it control of the host's Docker
+  daemon. That is a deliberate trade-off for building and deploying images from the pipeline.
+
+---
+
 ## Known Trade-offs / Future Work
 
 - Error-handling boilerplate is duplicated across services (candidate for a `common-web` module).
