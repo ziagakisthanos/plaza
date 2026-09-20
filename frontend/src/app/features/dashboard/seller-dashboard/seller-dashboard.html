@@ -16,6 +16,7 @@
     #fileInput
     class="visually-hidden"
     type="file"
+    aria-label="Product image"
     accept="image/*"
     (change)="onFileSelected($event)"
   />
@@ -153,7 +154,7 @@
 
 <!-- create / edit drawer -->
 @if (panelOpen()) {
-  <div class="overlay" (click)="closePanel()"></div>
+  <div class="overlay" (click)="closePanel()" (keyup.escape)="closePanel()"></div>
   <aside class="drawer" role="dialog" aria-modal="true" aria-label="Product details">
     <header class="drawer-head">
       <h2>{{ editingId() ? 'Edit product' : 'New product' }}</h2>
@@ -241,7 +242,7 @@
 
 <!-- delete confirmation -->
 @if (deletingId()) {
-  <div class="overlay" (click)="cancelDelete()"></div>
+  <div class="overlay" (click)="cancelDelete()" (keyup.escape)="cancelDelete()"></div>
   <div class="confirm" role="alertdialog" aria-modal="true">
     <span class="confirm-icon material-icons">delete_outline</span>
     <h3>Delete this product?</h3>

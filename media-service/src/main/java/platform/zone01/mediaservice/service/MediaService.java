@@ -34,7 +34,7 @@ public class MediaService {
     private static final Set<String> ALLOWED_TYPES =
             Set.of("image/jpeg", "image/png");
 
-    private static final long MAX_SIZE = 2 * 1024 * 1024; // 2 mb
+    private static final long MAX_SIZE = 2L * 1024 * 1024;
 
     public MediaService(MinioClient minioClient, MinioProperties props,
                         MediaRepository mediaRepository) {

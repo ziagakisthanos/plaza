@@ -51,7 +51,8 @@ export class Profile implements OnInit {
   /** Picks a different avatar than the one currently shown. */
   randomizeAvatar(): void {
     const others = this.avatarIds.filter((id) => id !== this.selectedAvatar());
-    this.selectedAvatar.set(others[Math.floor(Math.random() * others.length)]);
+    const [random] = crypto.getRandomValues(new Uint32Array(1));
+    this.selectedAvatar.set(others[random % others.length]);
   }
 
   roleLabel(): string {
