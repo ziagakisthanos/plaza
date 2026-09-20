@@ -7,6 +7,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import platform.zone01.productservice.dto.ProductRequestDTO;
 import platform.zone01.productservice.dto.ProductResponseDTO;
+import platform.zone01.productservice.dto.ProductSearchCriteria;
 import platform.zone01.productservice.service.ProductService;
 
 import java.util.List;
@@ -22,9 +23,14 @@ public class ProductController {
     }
 
     @GetMapping("")
-    public ResponseEntity<List<ProductResponseDTO>> getAllProducts() {
-        List<ProductResponseDTO> products = productService.getAllProducts();
+    public ResponseEntity<List<ProductResponseDTO>> searchProducts(@Valid @ModelAttribute ProductSearchCriteria criteria) {
+        List<ProductResponseDTO> products = productService.searchProducts(criteria);
         return ResponseEntity.ok(products);
+    }
+
+    @GetMapping("/categories")
+    public ResponseEntity<List<String>> getCategories() {
+        return ResponseEntity.ok(productService.getCategories());
     }
 
     @GetMapping("/{id}")
