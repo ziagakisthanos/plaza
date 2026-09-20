@@ -25,6 +25,14 @@
             <span class="material-icons">insights</span>Dashboard
           </a>
         }
+        @if (isLoggedIn() && isClient()) {
+          <a routerLink="/cart" routerLinkActive="active">
+            <span class="material-icons">shopping_cart</span>Cart
+            @if (cartCount() > 0) {
+              <span class="cart-count" aria-label="{{ cartCount() }} items in cart">{{ cartCount() }}</span>
+            }
+          </a>
+        }
         @if (isLoggedIn()) {
           <a routerLink="/profile" routerLinkActive="active" class="nav-mobile-only">
             <span class="material-icons">person</span>Profile

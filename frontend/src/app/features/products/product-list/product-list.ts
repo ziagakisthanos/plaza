@@ -5,6 +5,8 @@ import { RouterLink } from '@angular/router';
 import { EMPTY, catchError, debounceTime, filter, forkJoin, map, of, switchMap, tap } from 'rxjs';
 import { Product, ProductFilters, ProductService, ProductSort } from '../../../core/services/product';
 import { MediaService } from '../../../core/services/media';
+import { CartService } from '../../../core/services/cart';
+import { apiErrorMessage } from '../../../core/utils/api-error';
 import { AuthService } from '../../../core/services/auth';
 
 interface ProductWithImage extends Product {
@@ -12,6 +14,12 @@ interface ProductWithImage extends Product {
 }
 
 const SEARCH_DELAY_MS = 300;
+const NOTICE_MS = 4000;
+
+interface Notice {
+  kind: 'success' | 'error';
+  text: string;
+}
 
 @Component({
   selector: 'app-product-list',
@@ -23,11 +31,14 @@ export class ProductList {
   private productService = inject(ProductService);
   private mediaService = inject(MediaService);
   private authService = inject(AuthService);
+  private cartService = inject(CartService);
 
   products = signal<ProductWithImage[]>([]);
   categories = signal<string[]>([]);
   loading = signal(true);
   error = signal('');
+  notice = signal<Notice | null>(null);
+  addingId = signal<string | null>(null);
 
   query = signal('');
   category = signal('');
@@ -125,6 +136,45 @@ export class ProductList {
   private fail(): void {
     this.error.set('We could not load the marketplace. Please try again.');
     this.loading.set(false);
+  }
+
+  isClient(): boolean {
+    return this.authService.isLoggedIn() && this.authService.getRole() === 'CLIENT';
+  }
+
+  isLoggedIn(): boolean {
+    return this.authService.isLoggedIn();
+  }
+
+  canAdd(product: Product): boolean {
+    return product.quantity > 0 && this.cartService.quantityOf(product.id) < product.quantity;
+  }
+
+  addLabel(product: Product): string {
+    if (product.quantity === 0) return 'Sold out';
+    return this.canAdd(product) ? 'Add to cart' : 'All in your cart';
+  }
+
+  addToCart(product: Product): void {
+    this.addingId.set(product.id);
+    this.cartService.add(product.id).subscribe({
+      next: () => {
+        this.addingId.set(null);
+        this.showNotice('success', `${product.name} was added to your cart.`);
+      },
+      error: (error) => {
+        this.addingId.set(null);
+        this.showNotice('error', apiErrorMessage(error, 'We could not add the item to your cart.'));
+      },
+    });
+  }
+
+  private showNotice(kind: Notice['kind'], text: string): void {
+    const notice = { kind, text };
+    this.notice.set(notice);
+    setTimeout(() => {
+      if (this.notice() === notice) this.notice.set(null);
+    }, NOTICE_MS);
   }
 
   private priceFrom(event: Event): number | null {

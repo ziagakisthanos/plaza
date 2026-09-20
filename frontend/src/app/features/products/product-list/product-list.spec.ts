@@ -1,10 +1,12 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
+import { signal } from '@angular/core';
 import { of, throwError } from 'rxjs';
 import { ProductList } from './product-list';
 import { Product, ProductService } from '../../../core/services/product';
 import { MediaService } from '../../../core/services/media';
 import { AuthService } from '../../../core/services/auth';
+import { CartService } from '../../../core/services/cart';
 
 const laptop: Product = {
   id: 'p1',
@@ -21,6 +23,8 @@ describe('ProductList', () => {
   let fixture: ComponentFixture<ProductList>;
   let element: HTMLElement;
   let search: ReturnType<typeof vi.fn>;
+  let cartAdd: ReturnType<typeof vi.fn>;
+  let inCart: ReturnType<typeof signal<Record<string, number>>>;
 
   async function settle(): Promise<void> {
     fixture.detectChanges();
@@ -44,9 +48,14 @@ describe('ProductList', () => {
     return search.mock.calls[search.mock.calls.length - 1][0];
   }
 
-  async function create(products: Product[] = [laptop]): Promise<void> {
+  async function create(
+    products: Product[] = [laptop],
+    session: { loggedIn: boolean; role: string | null } = { loggedIn: true, role: 'CLIENT' },
+  ): Promise<void> {
     vi.useFakeTimers();
     search = vi.fn().mockReturnValue(of(products));
+    cartAdd = vi.fn().mockReturnValue(of({ items: [], itemCount: 1, total: 0 }));
+    inCart = signal({});
 
     await TestBed.configureTestingModule({
       imports: [ProductList],
@@ -60,7 +69,14 @@ describe('ProductList', () => {
           provide: MediaService,
           useValue: { getImagesForProduct: () => of([]), imageUrl: () => '' },
         },
-        { provide: AuthService, useValue: { isLoggedIn: () => true } },
+        {
+          provide: AuthService,
+          useValue: { isLoggedIn: () => session.loggedIn, getRole: () => session.role },
+        },
+        {
+          provide: CartService,
+          useValue: { add: cartAdd, quantityOf: (id: string) => inCart()[id] ?? 0 },
+        },
       ],
     }).compileComponents();
 
@@ -182,5 +198,92 @@ describe('ProductList', () => {
     type('input[type="search"]', 'lap');
     await settle();
     expect(element.querySelectorAll('.product-card').length).toBe(1);
+  });
+
+  describe('add to cart', () => {
+    function addButton(): HTMLButtonElement {
+      return element.querySelector('.add-to-cart') as HTMLButtonElement;
+    }
+
+    it('lets a client add a product and confirms it', async () => {
+      await create();
+
+      expect(addButton().textContent).toContain('Add to cart');
+      addButton().click();
+      await settle();
+
+      expect(cartAdd).toHaveBeenCalledWith('p1');
+      expect(element.querySelector('.alert-success')?.textContent).toContain(
+        'Gaming Laptop was added to your cart.',
+      );
+    });
+
+    it('hides the confirmation after a few seconds', async () => {
+      await create();
+
+      addButton().click();
+      await settle();
+      expect(element.querySelector('.alert-success')).not.toBeNull();
+
+      await vi.advanceTimersByTimeAsync(4000);
+      fixture.detectChanges();
+
+      expect(element.querySelector('.alert-success')).toBeNull();
+    });
+
+    it('shows the reason when the cart refuses the product', async () => {
+      await create();
+      cartAdd.mockReturnValue(
+        throwError(() => ({ error: { message: "Not enough stock for 'Gaming Laptop': only 3 left" } })),
+      );
+
+      addButton().click();
+      await settle();
+
+      expect(element.querySelector('.alert-error')?.textContent).toContain('only 3 left');
+      expect(addButton().disabled).toBe(false);
+    });
+
+    it('falls back to a friendly message when the server gives no reason', async () => {
+      await create();
+      cartAdd.mockReturnValue(throwError(() => ({ status: 0 })));
+
+      addButton().click();
+      await settle();
+
+      expect(element.querySelector('.alert-error')?.textContent).toContain(
+        'We could not add the item to your cart.',
+      );
+    });
+
+    it('disables a sold out product', async () => {
+      await create([{ ...laptop, quantity: 0 }]);
+
+      expect(addButton().disabled).toBe(true);
+      expect(addButton().textContent).toContain('Sold out');
+    });
+
+    it('disables the button once the whole stock is in the cart', async () => {
+      await create();
+      inCart.set({ p1: 3 });
+      fixture.detectChanges();
+
+      expect(addButton().disabled).toBe(true);
+      expect(addButton().textContent).toContain('All in your cart');
+    });
+
+    it('offers no cart to a seller', async () => {
+      await create([laptop], { loggedIn: true, role: 'SELLER' });
+
+      expect(element.querySelector('.add-to-cart')).toBeNull();
+    });
+
+    it('asks a visitor to sign in', async () => {
+      await create([laptop], { loggedIn: false, role: null });
+
+      const link = element.querySelector('a.add-to-cart') as HTMLAnchorElement;
+      expect(link.textContent).toContain('Sign in to buy');
+      expect(link.getAttribute('href')).toBe('/login');
+    });
   });
 });

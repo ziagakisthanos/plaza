@@ -34,6 +34,18 @@
     </div>
   </header>
 
+  @if (notice(); as notice) {
+    <div
+      class="alert rise-in"
+      [class.alert-success]="notice.kind === 'success'"
+      [class.alert-error]="notice.kind === 'error'"
+      [attr.role]="notice.kind === 'error' ? 'alert' : 'status'"
+    >
+      <span class="material-icons">{{ notice.kind === 'success' ? 'check_circle' : 'error_outline' }}</span
+      >{{ notice.text }}
+    </div>
+  }
+
   <div class="toolbar">
     <div class="search">
       <span class="material-icons">search</span>
@@ -195,6 +207,21 @@
                 }
               </span>
             </div>
+
+            @if (isClient()) {
+              <button
+                class="btn btn-primary btn-sm btn-block add-to-cart"
+                type="button"
+                [disabled]="!canAdd(product) || addingId() === product.id"
+                (click)="addToCart(product)"
+              >
+                <span class="material-icons icon">add_shopping_cart</span>{{ addLabel(product) }}
+              </button>
+            } @else if (!isLoggedIn()) {
+              <a class="btn btn-secondary btn-sm btn-block add-to-cart" routerLink="/login">
+                Sign in to buy
+              </a>
+            }
           </div>
         </article>
       }

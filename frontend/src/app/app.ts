@@ -2,6 +2,7 @@ import { Component, HostListener, inject, signal } from '@angular/core';
 import { NavigationEnd, Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { filter } from 'rxjs';
 import { AuthService } from './core/services/auth';
+import { CartService } from './core/services/cart';
 import { UserProfile, UserService } from './core/services/user';
 import { BrandMark } from './shared/brand-mark/brand-mark';
 
@@ -17,12 +18,14 @@ const BARE_ROUTES = ['/login', '/register'];
 export class App {
   private authService = inject(AuthService);
   private userService = inject(UserService);
+  private cartService = inject(CartService);
   private router = inject(Router);
 
   profile = signal<UserProfile | null>(null);
   menuOpen = signal(false);
   mobileNavOpen = signal(false);
   chromeless = signal(false);
+  cartCount = this.cartService.itemCount;
 
   constructor() {
     this.router.events.pipe(filter((e) => e instanceof NavigationEnd)).subscribe((e) => {
@@ -30,6 +33,7 @@ export class App {
       this.menuOpen.set(false);
       this.mobileNavOpen.set(false);
       this.syncProfile();
+      this.cartService.ensureLoaded();
     });
   }
 
@@ -52,6 +56,10 @@ export class App {
 
   isSeller(): boolean {
     return this.authService.getRole() === 'SELLER';
+  }
+
+  isClient(): boolean {
+    return this.authService.getRole() === 'CLIENT';
   }
 
   avatarUrl(): string {
