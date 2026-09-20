@@ -41,7 +41,8 @@
               }
             </div>
 
-            <div class="stepper" role="group" [attr.aria-label]="'Quantity of ' + item.name">
+            <fieldset class="stepper">
+              <legend class="visually-hidden">Quantity of {{ item.name }}</legend>
               <button
                 class="icon-btn"
                 type="button"
@@ -61,7 +62,7 @@
               >
                 <span class="material-icons">add</span>
               </button>
-            </div>
+            </fieldset>
 
             <div class="line-total">{{ item.lineTotal | currency: 'USD' }}</div>
 

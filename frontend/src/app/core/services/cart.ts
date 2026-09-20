@@ -23,12 +23,12 @@ const EMPTY_CART: Cart = { items: [], itemCount: 0, total: 0 };
 
 @Injectable({ providedIn: 'root' })
 export class CartService {
-  private http = inject(HttpClient);
-  private authService = inject(AuthService);
-  private apiUrl = environment.apiUrl;
+  private readonly http = inject(HttpClient);
+  private readonly authService = inject(AuthService);
+  private readonly apiUrl = environment.apiUrl;
 
   private loadedFor: string | null = null;
-  private state = signal<Cart>(EMPTY_CART);
+  private readonly state = signal<Cart>(EMPTY_CART);
 
   readonly cart = this.state.asReadonly();
   readonly itemCount = computed(() => this.state().itemCount);

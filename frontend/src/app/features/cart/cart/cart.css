@@ -43,6 +43,10 @@
   display: inline-flex;
   align-items: center;
   gap: 0.25rem;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
 }
 
 .quantity {

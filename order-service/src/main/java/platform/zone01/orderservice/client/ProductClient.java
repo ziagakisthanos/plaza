@@ -3,6 +3,7 @@ package platform.zone01.orderservice.client;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.stereotype.Component;
@@ -69,7 +70,7 @@ public class ProductClient {
                     .onStatus(status -> status.value() == 409, (request, answer) -> {
                         throw new InsufficientStockException(errorMessage(answer, "Not enough stock"));
                     })
-                    .onStatus(status -> status.isError(), (request, answer) -> {
+                    .onStatus(HttpStatusCode::isError, (request, answer) -> {
                         throw new ProductServiceUnavailableException(
                                 "Product service answered with status " + answer.getStatusCode().value());
                     });

@@ -16,10 +16,10 @@ const BARE_ROUTES = ['/login', '/register'];
   styleUrl: './app.css',
 })
 export class App {
-  private authService = inject(AuthService);
-  private userService = inject(UserService);
-  private cartService = inject(CartService);
-  private router = inject(Router);
+  private readonly authService = inject(AuthService);
+  private readonly userService = inject(UserService);
+  private readonly cartService = inject(CartService);
+  private readonly router = inject(Router);
 
   profile = signal<UserProfile | null>(null);
   menuOpen = signal(false);

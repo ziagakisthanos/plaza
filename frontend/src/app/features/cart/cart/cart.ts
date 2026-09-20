@@ -12,7 +12,7 @@ import { apiErrorMessage } from '../../../core/utils/api-error';
   styleUrl: './cart.css',
 })
 export class CartPage implements OnInit {
-  private cartService = inject(CartService);
+  private readonly cartService = inject(CartService);
 
   cart = this.cartService.cart;
   loading = signal(true);

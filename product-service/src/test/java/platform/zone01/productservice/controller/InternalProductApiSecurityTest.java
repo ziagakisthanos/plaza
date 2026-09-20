@@ -11,7 +11,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import platform.zone01.commonsecurity.jwt.JwtService;
 import platform.zone01.productservice.config.SecurityConfig;
 import platform.zone01.productservice.dto.ProductResponseDTO;
-import platform.zone01.productservice.dto.StockItemDTO;
 import platform.zone01.productservice.exception.InsufficientStockException;
 import platform.zone01.productservice.exception.ProductNotFoundException;
 import platform.zone01.productservice.service.ProductService;

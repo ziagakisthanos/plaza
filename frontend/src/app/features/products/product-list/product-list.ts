@@ -28,10 +28,10 @@ interface Notice {
   styleUrl: './product-list.css',
 })
 export class ProductList {
-  private productService = inject(ProductService);
-  private mediaService = inject(MediaService);
-  private authService = inject(AuthService);
-  private cartService = inject(CartService);
+  private readonly productService = inject(ProductService);
+  private readonly mediaService = inject(MediaService);
+  private readonly authService = inject(AuthService);
+  private readonly cartService = inject(CartService);
 
   products = signal<ProductWithImage[]>([]);
   categories = signal<string[]>([]);
