@@ -199,7 +199,7 @@ describe('OrdersPage', () => {
 
     it('falls back to a friendly message when the server gives no reason', async () => {
       await open('client', [orderOf('o1', 'DELIVERED')]);
-      service.redo.mockReturnValue(throwError(() => ({ status: 0 })));
+      service.redo.mockReturnValue(throwError(() => ({ status: 500 })));
 
       click('Order again');
       await settle();

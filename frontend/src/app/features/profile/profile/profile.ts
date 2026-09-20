@@ -1,6 +1,7 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { UserProfile, UserService } from '../../../core/services/user';
+import { apiErrorMessage } from '../../../core/utils/api-error';
 import { ProfileStats } from '../profile-stats/profile-stats';
 
 @Component({
@@ -34,8 +35,8 @@ export class Profile implements OnInit {
         this.selectedAvatar.set(profile.avatar ?? '1');
         this.loading.set(false);
       },
-      error: () => {
-        this.error.set('Failed to load your profile');
+      error: (error) => {
+        this.error.set(apiErrorMessage(error, 'Failed to load your profile'));
         this.loading.set(false);
       },
     });
@@ -89,9 +90,9 @@ export class Profile implements OnInit {
           this.message.set('Profile updated');
           setTimeout(() => this.message.set(''), 3200);
         },
-        error: () => {
+        error: (error) => {
           this.saving.set(false);
-          this.error.set('Failed to update your profile');
+          this.error.set(apiErrorMessage(error, 'Failed to update your profile'));
         },
       });
   }

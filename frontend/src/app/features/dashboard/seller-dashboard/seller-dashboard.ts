@@ -5,6 +5,7 @@ import { catchError, forkJoin, map, of } from 'rxjs';
 import { Product, ProductService } from '../../../core/services/product';
 import { AuthService } from '../../../core/services/auth';
 import { MediaService } from '../../../core/services/media';
+import { apiErrorMessage } from '../../../core/utils/api-error';
 
 interface SellerProduct extends Product {
   imageUrl?: string;
@@ -89,15 +90,15 @@ export class SellerDashboard implements OnInit {
             this.myProducts.set(result);
             this.loading.set(false);
           },
-          error: () => this.fail('Failed to load your products'),
+          error: (error) => this.fail(error, 'Failed to load your products'),
         });
       },
-      error: () => this.fail('Failed to load your products'),
+      error: (error) => this.fail(error, 'Failed to load your products'),
     });
   }
 
-  private fail(message: string): void {
-    this.errorMessage.set(message);
+  private fail(error: unknown, fallback: string): void {
+    this.errorMessage.set(apiErrorMessage(error, fallback));
     this.loading.set(false);
   }
 
@@ -162,9 +163,11 @@ export class SellerDashboard implements OnInit {
         this.loadMyProducts();
         this.loadCategories();
       },
-      error: () => {
+      error: (error) => {
         this.saving.set(false);
-        this.errorMessage.set(id ? 'Failed to update product' : 'Failed to create product');
+        this.errorMessage.set(
+          apiErrorMessage(error, id ? 'Failed to update product' : 'Failed to create product'),
+        );
       },
     });
   }
@@ -188,9 +191,9 @@ export class SellerDashboard implements OnInit {
         this.flash('Product deleted');
         this.loadMyProducts();
       },
-      error: () => {
+      error: (error) => {
         this.deletingId.set(null);
-        this.errorMessage.set('Failed to delete product');
+        this.errorMessage.set(apiErrorMessage(error, 'Failed to delete product'));
       },
     });
   }
@@ -242,8 +245,8 @@ export class SellerDashboard implements OnInit {
         this.flash('Image uploaded');
         this.loadMyProducts();
       },
-      error: () => {
-        this.errorMessage.set('Failed to upload image');
+      error: (error) => {
+        this.errorMessage.set(apiErrorMessage(error, 'Failed to upload image'));
         this.selectedFile.set(null);
         this.uploadingFor.set(null);
       },

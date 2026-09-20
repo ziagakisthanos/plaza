@@ -246,7 +246,7 @@ describe('ProductList', () => {
 
     it('falls back to a friendly message when the server gives no reason', async () => {
       await create();
-      cartAdd.mockReturnValue(throwError(() => ({ status: 0 })));
+      cartAdd.mockReturnValue(throwError(() => ({ status: 500 })));
 
       addButton().click();
       await settle();

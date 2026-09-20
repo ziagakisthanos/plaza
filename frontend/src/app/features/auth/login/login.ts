@@ -3,6 +3,7 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../../core/services/auth';
 import { BrandMark } from '../../../shared/brand-mark/brand-mark';
+import { apiErrorMessage } from '../../../core/utils/api-error';
 
 @Component({
   selector: 'app-login',
@@ -58,7 +59,7 @@ export class Login {
         this.errorMessage.set(
           err.status === 401
             ? 'Invalid email or password'
-            : 'Something went wrong. Please try again.',
+            : apiErrorMessage(err, 'Something went wrong. Please try again.'),
         );
       },
     });
