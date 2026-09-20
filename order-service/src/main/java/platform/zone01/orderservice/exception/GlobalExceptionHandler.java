@@ -3,6 +3,7 @@ package platform.zone01.orderservice.exception;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.FieldError;
@@ -50,9 +51,14 @@ public class GlobalExceptionHandler {
         return errorResponse(HttpStatus.BAD_REQUEST, "Malformed request body", request);
     }
 
-    @ExceptionHandler({InsufficientStockException.class, CartConflictException.class})
+    @ExceptionHandler({InsufficientStockException.class, CartConflictException.class, InvalidOrderStateException.class})
     public ResponseEntity<ErrorResponseDTO> handleConflict(RuntimeException ex, HttpServletRequest request) {
         return errorResponse(HttpStatus.CONFLICT, ex.getMessage(), request);
+    }
+
+    @ExceptionHandler(OptimisticLockingFailureException.class)
+    public ResponseEntity<ErrorResponseDTO> handleConcurrentChange(OptimisticLockingFailureException ex, HttpServletRequest request) {
+        return errorResponse(HttpStatus.CONFLICT, "The order was changed at the same time, please reload and try again", request);
     }
 
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)

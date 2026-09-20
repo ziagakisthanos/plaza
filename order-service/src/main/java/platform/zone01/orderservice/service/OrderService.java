@@ -17,6 +17,7 @@ import platform.zone01.orderservice.entity.OrderItem;
 import platform.zone01.orderservice.enums.OrderStatus;
 import platform.zone01.orderservice.enums.PaymentMethod;
 import platform.zone01.orderservice.exception.CartEmptyException;
+import platform.zone01.orderservice.exception.InvalidOrderStateException;
 import platform.zone01.orderservice.exception.NotOrderParticipantException;
 import platform.zone01.orderservice.exception.OrderNotFoundException;
 import platform.zone01.orderservice.exception.ProductUnavailableException;
@@ -76,12 +77,85 @@ public class OrderService {
     }
 
     public OrderResponseDTO getOrder(String orderId, String userId) {
-        Order order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new OrderNotFoundException("Order with id: " + orderId + " not found"));
-        if (!userId.equals(order.getBuyerId()) && !userId.equals(order.getSellerId())) {
-            throw new NotOrderParticipantException("You can only see orders that you placed or received");
-        }
+        Order order = findOrder(orderId);
+        requireParticipant(order, userId, "You can only see orders that you placed or received");
         return OrderResponseDTO.from(order);
+    }
+
+    public OrderResponseDTO updateStatus(String orderId, String sellerId, OrderStatus target) {
+        Order order = findOrder(orderId);
+        requireSeller(order, sellerId, "Only the seller of an order can change its status");
+        if (order.getStatus().next().filter(next -> next == target).isEmpty()) {
+            throw new InvalidOrderStateException("An order that is " + order.getStatus() + " cannot be changed to " + target);
+        }
+        order.setStatus(target);
+        return OrderResponseDTO.from(save(order));
+    }
+
+    public OrderResponseDTO cancel(String orderId, String userId) {
+        Order order = findOrder(orderId);
+        requireParticipant(order, userId, "You can only cancel orders that you placed or received");
+        if (!order.getStatus().canBeCancelled()) {
+            throw new InvalidOrderStateException("Only pending or confirmed orders can be cancelled");
+        }
+        order.setStatus(OrderStatus.CANCELLED);
+        Order cancelled = save(order);
+        releaseQuietly(stockItemsOf(order));
+        return OrderResponseDTO.from(cancelled);
+    }
+
+    public void remove(String orderId, String buyerId) {
+        Order order = findOrder(orderId);
+        requireBuyer(order, buyerId, "Only the buyer can remove an order");
+        if (order.getStatus() != OrderStatus.CANCELLED) {
+            throw new InvalidOrderStateException("Only cancelled orders can be removed");
+        }
+        orderRepository.delete(order);
+    }
+
+    public OrderResponseDTO redo(String orderId, String buyerId) {
+        Order original = findOrder(orderId);
+        requireBuyer(original, buyerId, "Only the buyer can order the same items again");
+        if (original.getStatus() != OrderStatus.DELIVERED && original.getStatus() != OrderStatus.CANCELLED) {
+            throw new InvalidOrderStateException("Only delivered or cancelled orders can be ordered again");
+        }
+        List<Order> orders = placeOrders(buyerId, stockItemsOf(original),
+                original.getDeliveryAddress(), original.getPaymentMethod());
+        return OrderResponseDTO.from(orders.get(0));
+    }
+
+    private Order findOrder(String orderId) {
+        return orderRepository.findById(orderId)
+                .orElseThrow(() -> new OrderNotFoundException("Order with id: " + orderId + " not found"));
+    }
+
+    private void requireParticipant(Order order, String userId, String message) {
+        if (!userId.equals(order.getBuyerId()) && !userId.equals(order.getSellerId())) {
+            throw new NotOrderParticipantException(message);
+        }
+    }
+
+    private void requireBuyer(Order order, String userId, String message) {
+        if (!userId.equals(order.getBuyerId())) {
+            throw new NotOrderParticipantException(message);
+        }
+    }
+
+    private void requireSeller(Order order, String userId, String message) {
+        if (!userId.equals(order.getSellerId())) {
+            throw new NotOrderParticipantException(message);
+        }
+    }
+
+    private Order save(Order order) {
+        order.setUpdatedAt(Instant.now());
+        return orderRepository.save(order);
+    }
+
+    private List<StockItemDTO> stockItemsOf(Order order) {
+        return order.getItems().stream()
+                .map(item -> new StockItemDTO(item.getProductId(), item.getQuantity()))
+                .toList();
     }
 
     private List<OrderResponseDTO> filter(List<Order> orders, String query, OrderStatus status) {
