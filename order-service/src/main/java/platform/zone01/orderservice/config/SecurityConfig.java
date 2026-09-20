@@ -40,6 +40,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/cart/**").hasRole("CLIENT")
                         .requestMatchers(HttpMethod.POST, "/orders/checkout").hasRole("CLIENT")
+                        .requestMatchers(HttpMethod.GET, "/orders").hasRole("CLIENT")
+                        .requestMatchers(HttpMethod.GET, "/orders/seller").hasRole("SELLER")
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)

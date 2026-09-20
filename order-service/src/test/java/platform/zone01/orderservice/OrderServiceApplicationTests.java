@@ -27,16 +27,16 @@ class OrderServiceApplicationTests {
 
     @Test
     void requestsWithoutAToken_getTheStandardUnauthorizedResponse() throws Exception {
-        mockMvc.perform(get("/orders"))
+        mockMvc.perform(get("/unknown"))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.status").value(401))
                 .andExpect(jsonPath("$.message").value("Authentication required"))
-                .andExpect(jsonPath("$.path").value("/orders"));
+                .andExpect(jsonPath("$.path").value("/unknown"));
     }
 
     @Test
     void requestsWithAForgedToken_areUnauthorized() throws Exception {
-        mockMvc.perform(get("/orders").header("Authorization", "Bearer forged"))
+        mockMvc.perform(get("/unknown").header("Authorization", "Bearer forged"))
                 .andExpect(status().isUnauthorized());
     }
 
@@ -44,7 +44,7 @@ class OrderServiceApplicationTests {
     void requestsWithAValidToken_passSecurity() throws Exception {
         String token = jwtService.generateToken("user-1", "CLIENT");
 
-        mockMvc.perform(get("/orders").header("Authorization", "Bearer " + token))
+        mockMvc.perform(get("/unknown").header("Authorization", "Bearer " + token))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.message").value("Resource not found"));
     }

@@ -9,6 +9,7 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 import platform.zone01.orderservice.dto.ErrorResponseDTO;
 
@@ -54,7 +55,17 @@ public class GlobalExceptionHandler {
         return errorResponse(HttpStatus.CONFLICT, ex.getMessage(), request);
     }
 
-    @ExceptionHandler({ProductUnavailableException.class, CartItemNotFoundException.class})
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<ErrorResponseDTO> handleBadParameter(MethodArgumentTypeMismatchException ex, HttpServletRequest request) {
+        return errorResponse(HttpStatus.BAD_REQUEST, "Invalid value '" + ex.getValue() + "' for parameter '" + ex.getName() + "'", request);
+    }
+
+    @ExceptionHandler(NotOrderParticipantException.class)
+    public ResponseEntity<ErrorResponseDTO> handleNotParticipant(NotOrderParticipantException ex, HttpServletRequest request) {
+        return errorResponse(HttpStatus.FORBIDDEN, ex.getMessage(), request);
+    }
+
+    @ExceptionHandler({ProductUnavailableException.class, CartItemNotFoundException.class, OrderNotFoundException.class})
     public ResponseEntity<ErrorResponseDTO> handleNotFound(RuntimeException ex, HttpServletRequest request) {
         return errorResponse(HttpStatus.NOT_FOUND, ex.getMessage(), request);
     }

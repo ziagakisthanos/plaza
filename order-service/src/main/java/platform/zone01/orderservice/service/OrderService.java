@@ -17,6 +17,8 @@ import platform.zone01.orderservice.entity.OrderItem;
 import platform.zone01.orderservice.enums.OrderStatus;
 import platform.zone01.orderservice.enums.PaymentMethod;
 import platform.zone01.orderservice.exception.CartEmptyException;
+import platform.zone01.orderservice.exception.NotOrderParticipantException;
+import platform.zone01.orderservice.exception.OrderNotFoundException;
 import platform.zone01.orderservice.exception.ProductUnavailableException;
 import platform.zone01.orderservice.repository.OrderRepository;
 import platform.zone01.orderservice.util.Money;
@@ -25,6 +27,7 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -62,6 +65,42 @@ public class OrderService {
             restoreCart(cart);
             throw e;
         }
+    }
+
+    public List<OrderResponseDTO> listForBuyer(String buyerId, String query, OrderStatus status) {
+        return filter(orderRepository.findByBuyerIdOrderByCreatedAtDesc(buyerId), query, status);
+    }
+
+    public List<OrderResponseDTO> listForSeller(String sellerId, String query, OrderStatus status) {
+        return filter(orderRepository.findBySellerIdOrderByCreatedAtDesc(sellerId), query, status);
+    }
+
+    public OrderResponseDTO getOrder(String orderId, String userId) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new OrderNotFoundException("Order with id: " + orderId + " not found"));
+        if (!userId.equals(order.getBuyerId()) && !userId.equals(order.getSellerId())) {
+            throw new NotOrderParticipantException("You can only see orders that you placed or received");
+        }
+        return OrderResponseDTO.from(order);
+    }
+
+    private List<OrderResponseDTO> filter(List<Order> orders, String query, OrderStatus status) {
+        String needle = query == null ? "" : query.trim().toLowerCase(Locale.ROOT);
+        return orders.stream()
+                .filter(order -> status == null || order.getStatus() == status)
+                .filter(order -> needle.isEmpty() || mentions(order, needle))
+                .map(OrderResponseDTO::from)
+                .toList();
+    }
+
+    private boolean mentions(Order order, String needle) {
+        return contains(order.getId(), needle)
+                || contains(order.getDeliveryAddress(), needle)
+                || order.getItems().stream().anyMatch(item -> contains(item.getName(), needle));
+    }
+
+    private boolean contains(String text, String needle) {
+        return text != null && text.toLowerCase(Locale.ROOT).contains(needle);
     }
 
     private Cart claimCart(String buyerId) {
