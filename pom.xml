@@ -26,6 +26,7 @@
         <module>common-security</module>
         <module>product-service</module>
         <module>media-service</module>
+        <module>order-service</module>
     </modules>
 
     <properties>

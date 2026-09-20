@@ -112,6 +112,18 @@ services:
     networks:
       - buy02-net
 
+  order-service:
+    build: ./order-service
+    container_name: buy02-order
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      JWT_SECRET: ${JWT_SECRET}
+    depends_on:
+      - discovery
+      - mongo
+    networks:
+      - buy02-net
+
   frontend:
     build: ./frontend          # points at frontend/Dockerfile
     container_name: buy02-frontend
