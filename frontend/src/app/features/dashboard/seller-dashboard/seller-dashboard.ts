@@ -23,6 +23,7 @@ export class SellerDashboard implements OnInit {
   private fb = inject(FormBuilder);
 
   myProducts = signal<SellerProduct[]>([]);
+  categories = signal<string[]>([]);
   loading = signal(true);
   errorMessage = signal('');
   successMessage = signal('');
@@ -46,12 +47,21 @@ export class SellerDashboard implements OnInit {
   productForm = this.fb.group({
     name: ['', [Validators.required]],
     description: [''],
+    category: ['', [Validators.required, Validators.maxLength(50)]],
     price: [null as number | null, [Validators.required, Validators.min(0.01)]],
     quantity: [null as number | null, [Validators.required, Validators.min(0)]],
   });
 
   ngOnInit(): void {
     this.loadMyProducts();
+    this.loadCategories();
+  }
+
+  private loadCategories(): void {
+    this.productService.getCategories().subscribe({
+      next: (categories) => this.categories.set(categories),
+      error: () => this.categories.set([]),
+    });
   }
 
   loadMyProducts(): void {
@@ -109,6 +119,7 @@ export class SellerDashboard implements OnInit {
     this.productForm.setValue({
       name: product.name,
       description: product.description ?? '',
+      category: product.category ?? '',
       price: product.price,
       quantity: product.quantity,
     });
@@ -130,6 +141,7 @@ export class SellerDashboard implements OnInit {
     const product = {
       name: this.productForm.value.name!,
       description: this.productForm.value.description ?? '',
+      category: this.productForm.value.category!.trim(),
       price: this.productForm.value.price!,
       quantity: this.productForm.value.quantity!,
     };
@@ -148,6 +160,7 @@ export class SellerDashboard implements OnInit {
         this.flash(id ? 'Product updated' : 'Product added');
         this.closePanel();
         this.loadMyProducts();
+        this.loadCategories();
       },
       error: () => {
         this.saving.set(false);

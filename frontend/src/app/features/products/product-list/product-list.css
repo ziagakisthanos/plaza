@@ -179,6 +179,34 @@
   opacity: 1;
 }
 
+.filter .input {
+  width: auto;
+  min-width: 160px;
+  padding-right: 2rem;
+  cursor: pointer;
+}
+
+.price-range {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.price-range .input {
+  width: 6.5rem;
+}
+
+.range-dash {
+  color: var(--ink-500);
+}
+
+.filter-error {
+  margin: -0.75rem 0 1rem;
+  color: var(--danger-600);
+  font-size: 0.85rem;
+  font-weight: 550;
+}
+
 .sort {
   margin-left: auto;
 }

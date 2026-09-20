@@ -631,6 +631,15 @@ textarea.input {
   font-weight: 650;
 }
 
+.product-category {
+  margin: 0 0 0.3rem;
+  color: var(--ink-500);
+  font-size: 0.72rem;
+  font-weight: 650;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
 .product-desc {
   margin: 0 0 0.85rem;
   display: -webkit-box;

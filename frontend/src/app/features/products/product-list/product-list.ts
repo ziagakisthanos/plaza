@@ -1,8 +1,9 @@
-import { Component, computed, inject, OnInit, signal } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
+import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
 import { CurrencyPipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
-import { catchError, forkJoin, map, of } from 'rxjs';
-import { Product, ProductService } from '../../../core/services/product';
+import { EMPTY, catchError, debounceTime, filter, forkJoin, map, of, switchMap, tap } from 'rxjs';
+import { Product, ProductFilters, ProductService, ProductSort } from '../../../core/services/product';
 import { MediaService } from '../../../core/services/media';
 import { AuthService } from '../../../core/services/auth';
 
@@ -10,7 +11,7 @@ interface ProductWithImage extends Product {
   imageUrl?: string;
 }
 
-type SortKey = 'newest' | 'price-asc' | 'price-desc' | 'name';
+const SEARCH_DELAY_MS = 300;
 
 @Component({
   selector: 'app-product-list',
@@ -18,86 +19,107 @@ type SortKey = 'newest' | 'price-asc' | 'price-desc' | 'name';
   templateUrl: './product-list.html',
   styleUrl: './product-list.css',
 })
-export class ProductList implements OnInit {
+export class ProductList {
   private productService = inject(ProductService);
   private mediaService = inject(MediaService);
   private authService = inject(AuthService);
 
   products = signal<ProductWithImage[]>([]);
+  categories = signal<string[]>([]);
   loading = signal(true);
   error = signal('');
 
   query = signal('');
-  sort = signal<SortKey>('newest');
+  category = signal('');
+  minPrice = signal<number | null>(null);
+  maxPrice = signal<number | null>(null);
+  sort = signal<ProductSort>('newest');
   inStockOnly = signal(false);
 
-  readonly sorts: { key: SortKey; label: string }[] = [
-    { key: 'newest', label: 'Featured' },
-    { key: 'price-asc', label: 'Price: low to high' },
-    { key: 'price-desc', label: 'Price: high to low' },
-    { key: 'name', label: 'Name A–Z' },
+  readonly sorts: { key: ProductSort; label: string }[] = [
+    { key: 'newest', label: 'Newest' },
+    { key: 'price_asc', label: 'Price: low to high' },
+    { key: 'price_desc', label: 'Price: high to low' },
   ];
 
-  visibleProducts = computed(() => {
-    const term = this.query().trim().toLowerCase();
-    let list = this.products();
+  filters = computed<ProductFilters>(() => ({
+    q: this.query(),
+    category: this.category(),
+    minPrice: this.minPrice(),
+    maxPrice: this.maxPrice(),
+    inStock: this.inStockOnly(),
+    sort: this.sort(),
+  }));
 
-    if (term) {
-      list = list.filter(
-        (p) =>
-          p.name.toLowerCase().includes(term) || (p.description ?? '').toLowerCase().includes(term),
-      );
+  priceError = computed(() => {
+    const min = this.minPrice();
+    const max = this.maxPrice();
+    if ((min !== null && (Number.isNaN(min) || min < 0)) || (max !== null && (Number.isNaN(max) || max < 0))) {
+      return 'Prices must be numbers of 0 or more.';
     }
-    if (this.inStockOnly()) {
-      list = list.filter((p) => p.quantity > 0);
+    if (min !== null && max !== null && min > max) {
+      return 'The minimum price cannot be higher than the maximum price.';
     }
-
-    const sorted = [...list];
-    switch (this.sort()) {
-      case 'price-asc':
-        return sorted.sort((a, b) => a.price - b.price);
-      case 'price-desc':
-        return sorted.sort((a, b) => b.price - a.price);
-      case 'name':
-        return sorted.sort((a, b) => a.name.localeCompare(b.name));
-      default:
-        return sorted;
-    }
+    return '';
   });
 
-  isFiltered = computed(() => this.query().trim().length > 0 || this.inStockOnly());
+  isFiltered = computed(
+    () =>
+      this.query().trim().length > 0 ||
+      this.category() !== '' ||
+      this.minPrice() !== null ||
+      this.maxPrice() !== null ||
+      this.inStockOnly(),
+  );
+  showSkeleton = computed(() => this.loading() && this.products().length === 0);
   showSellerCta = computed(() => !this.authService.isLoggedIn());
 
-  ngOnInit(): void {
-    this.productService.getAll().subscribe({
-      next: (products) => {
-        if (products.length === 0) {
-          this.products.set([]);
-          this.loading.set(false);
-          return;
-        }
-
-        // Fetch each product's first image, tolerating media failures per product.
-        const withImages$ = products.map((product) =>
-          this.mediaService.getImagesForProduct(product.id).pipe(
-            map((images) => ({
-              ...product,
-              imageUrl: images.length ? this.mediaService.imageUrl(images[0].id) : undefined,
-            })),
-            catchError(() => of({ ...product, imageUrl: undefined })),
+  constructor() {
+    toObservable(this.filters)
+      .pipe(
+        debounceTime(SEARCH_DELAY_MS),
+        filter(() => this.priceError() === ''),
+        tap(() => {
+          this.loading.set(true);
+          this.error.set('');
+        }),
+        switchMap((filters) =>
+          this.productService.search(filters).pipe(
+            switchMap((products) => this.withImages(products)),
+            catchError(() => {
+              this.fail();
+              return EMPTY;
+            }),
           ),
-        );
+        ),
+        takeUntilDestroyed(),
+      )
+      .subscribe((products) => {
+        this.products.set(products);
+        this.loading.set(false);
+      });
 
-        forkJoin(withImages$).subscribe({
-          next: (result) => {
-            this.products.set(result);
-            this.loading.set(false);
-          },
-          error: () => this.fail(),
-        });
-      },
-      error: () => this.fail(),
+    this.productService.getCategories().subscribe({
+      next: (categories) => this.categories.set(categories),
+      error: () => this.categories.set([]),
     });
+  }
+
+  private withImages(products: Product[]) {
+    if (products.length === 0) {
+      return of<ProductWithImage[]>([]);
+    }
+    return forkJoin(
+      products.map((product) =>
+        this.mediaService.getImagesForProduct(product.id).pipe(
+          map((images) => ({
+            ...product,
+            imageUrl: images.length ? this.mediaService.imageUrl(images[0].id) : undefined,
+          })),
+          catchError(() => of({ ...product, imageUrl: undefined })),
+        ),
+      ),
+    );
   }
 
   private fail(): void {
@@ -105,12 +127,29 @@ export class ProductList implements OnInit {
     this.loading.set(false);
   }
 
+  private priceFrom(event: Event): number | null {
+    const value = (event.target as HTMLInputElement).value;
+    return value === '' ? null : Number(value);
+  }
+
   onSearch(event: Event): void {
     this.query.set((event.target as HTMLInputElement).value);
   }
 
+  setCategory(event: Event): void {
+    this.category.set((event.target as HTMLSelectElement).value);
+  }
+
+  setMinPrice(event: Event): void {
+    this.minPrice.set(this.priceFrom(event));
+  }
+
+  setMaxPrice(event: Event): void {
+    this.maxPrice.set(this.priceFrom(event));
+  }
+
   setSort(event: Event): void {
-    this.sort.set((event.target as HTMLSelectElement).value as SortKey);
+    this.sort.set((event.target as HTMLSelectElement).value as ProductSort);
   }
 
   toggleInStock(): void {
@@ -119,6 +158,9 @@ export class ProductList implements OnInit {
 
   clearFilters(): void {
     this.query.set('');
+    this.category.set('');
+    this.minPrice.set(null);
+    this.maxPrice.set(null);
     this.inStockOnly.set(false);
   }
 }
