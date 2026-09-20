@@ -4,10 +4,15 @@ def notify(String status) {
 =========== NOTIFICATION ===========
 Status:   ${status}
 Job:      ${env.JOB_NAME} #${env.BUILD_NUMBER}
+Branch:   ${env.BUILD_BRANCH}
 Duration: ${currentBuild.durationString}
 Details:  ${env.BUILD_URL}console
 ====================================
 """
+}
+
+def isMain() {
+    return env.BUILD_BRANCH == 'main'
 }
 
 pipeline {
@@ -39,7 +44,13 @@ pipeline {
 
         stage('Checkout') {
             steps {
-                checkout scm
+                script {
+                    def scmVars = checkout scm
+                    if (!scmVars.GIT_BRANCH) {
+                        error 'Could not tell which branch is being built'
+                    }
+                    env.BUILD_BRANCH = scmVars.GIT_BRANCH.replaceFirst('^origin/', '')
+                }
             }
         }
 
@@ -64,6 +75,7 @@ pipeline {
         }
 
         stage('SonarQube Analysis') {
+            when { expression { isMain() } }
             steps {
                 echo 'Analysing code quality and waiting for the quality gate...'
                 sh 'sonar-scanner -Dsonar.qualitygate.wait=true'
@@ -71,6 +83,7 @@ pipeline {
         }
 
         stage('Build Images') {
+            when { expression { isMain() } }
             steps {
                 echo 'Backing up current images, then building new ones...'
                 // Keep the last known-good image of every service as :backup for rollback
@@ -88,6 +101,7 @@ pipeline {
         }
 
         stage('Deploy') {
+            when { expression { isMain() } }
             steps {
                 echo 'Deploying...'
                 sh 'docker compose up -d'
@@ -107,8 +121,11 @@ pipeline {
 
     post {
         always {
-            // Pipeline is complete: leave nothing running (named volumes/data are kept)
-            sh 'docker compose down --remove-orphans || true'
+            script {
+                if (isMain()) {
+                    sh 'docker compose down --remove-orphans || true'
+                }
+            }
         }
         success {
             script { notify('SUCCESS') }
