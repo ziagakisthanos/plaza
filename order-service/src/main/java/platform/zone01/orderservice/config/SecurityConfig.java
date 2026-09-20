@@ -23,6 +23,9 @@ import java.time.Instant;
 @EnableWebSecurity
 public class SecurityConfig {
 
+    private static final String CLIENT = "CLIENT";
+    private static final String SELLER = "SELLER";
+
     private final JwtAuthFilter jwtAuthFilter;
     private final ObjectMapper objectMapper;
 
@@ -38,13 +41,13 @@ public class SecurityConfig {
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/cart/**").hasRole("CLIENT")
-                        .requestMatchers(HttpMethod.POST, "/orders/checkout").hasRole("CLIENT")
-                        .requestMatchers(HttpMethod.GET, "/orders").hasRole("CLIENT")
-                        .requestMatchers(HttpMethod.GET, "/orders/seller").hasRole("SELLER")
-                        .requestMatchers(HttpMethod.PUT, "/orders/*/status").hasRole("SELLER")
-                        .requestMatchers(HttpMethod.DELETE, "/orders/*").hasRole("CLIENT")
-                        .requestMatchers(HttpMethod.POST, "/orders/*/redo").hasRole("CLIENT")
+                        .requestMatchers("/cart/**").hasRole(CLIENT)
+                        .requestMatchers(HttpMethod.POST, "/orders/checkout").hasRole(CLIENT)
+                        .requestMatchers(HttpMethod.GET, "/orders").hasRole(CLIENT)
+                        .requestMatchers(HttpMethod.GET, "/orders/seller").hasRole(SELLER)
+                        .requestMatchers(HttpMethod.PUT, "/orders/*/status").hasRole(SELLER)
+                        .requestMatchers(HttpMethod.DELETE, "/orders/*").hasRole(CLIENT)
+                        .requestMatchers(HttpMethod.POST, "/orders/*/redo").hasRole(CLIENT)
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
