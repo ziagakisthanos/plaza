@@ -23,6 +23,7 @@ pipeline {
     triggers {
         // Poll the repo every ~2 minutes; a new commit on main starts a build
         pollSCM('H/2 * * * *')
+        cron('H 2 * * *')
     }
 
     environment {
@@ -30,6 +31,8 @@ pipeline {
         JWT_SECRET = credentials('jwt-secret')
         // Fixed project name => predictable image names (buy01-<service>)
         COMPOSE_PROJECT_NAME = 'buy01'
+        SONAR_HOST_URL = 'http://sonarqube:9000'
+        SONAR_TOKEN = credentials('sonar-token')
     }
 
     stages {
@@ -57,6 +60,13 @@ pipeline {
                     junit allowEmptyResults: true, testResults: '**/target/surefire-reports/*.xml'
                     archiveArtifacts artifacts: '**/target/surefire-reports/*', allowEmptyArchive: true
                 }
+            }
+        }
+
+        stage('SonarQube Analysis') {
+            steps {
+                echo 'Analysing code quality and waiting for the quality gate...'
+                sh 'sonar-scanner -Dsonar.qualitygate.wait=true'
             }
         }
 
