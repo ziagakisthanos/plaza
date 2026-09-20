@@ -12,6 +12,7 @@ import platform.zone01.productservice.exception.NotProductOwnerException;
 import platform.zone01.productservice.exception.ProductNotFoundException;
 import platform.zone01.productservice.repository.ProductRepository;
 
+import java.time.Instant;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -29,7 +30,7 @@ class ProductServiceTest {
 
     @Test
     void createProduct_setsOwnerFromCallerId_notFromRequest() {
-        ProductRequestDTO request = new ProductRequestDTO("Laptop", "A good laptop", 999.0, 5);
+        ProductRequestDTO request = new ProductRequestDTO("Laptop", "A good laptop", "Electronics", 999.0, 5);
         String callerId = "seller-123";
         when(productRepository.save(any(Product.class)))
                 .thenAnswer(invocation -> {
@@ -47,10 +48,10 @@ class ProductServiceTest {
 
     @Test
     void updateProduct_throwsForbidden_whenCallerIsNotOwner() {
-        Product existing = new Product("prod-1", "Laptop", "desc", 999.0, 5, "owner-A");
+        Product existing = new Product("prod-1", "Laptop", "desc", 999.0, 5, "owner-A", "Electronics", null);
         when(productRepository.findById("prod-1")).thenReturn(Optional.of(existing));
 
-        ProductRequestDTO request = new ProductRequestDTO("Hacked", "desc", 1.0, 1);
+        ProductRequestDTO request = new ProductRequestDTO("Hacked", "desc", "Electronics", 1.0, 1);
 
         assertThatThrownBy(() ->
                 productService.updateProduct(request, "prod-1", "attacker-B"))
@@ -61,13 +62,13 @@ class ProductServiceTest {
 
     @Test
     void updateProduct_succeeds_whenCallerIsOwner() {
-        Product existing = new Product("prod-1", "Laptop", "desc", 999.0, 5, "owner-A");
+        Product existing = new Product("prod-1", "Laptop", "desc", 999.0, 5, "owner-A", "Electronics", null);
         when(productRepository.findById("prod-1")).thenReturn(Optional.of(existing));
 
         when(productRepository.save(any(Product.class)))
                 .thenAnswer(inv -> inv.getArgument(0));
 
-        ProductRequestDTO request = new ProductRequestDTO("Updated name", "new desc", 1.0, 1);
+        ProductRequestDTO request = new ProductRequestDTO("Updated name", "new desc", "Office", 1.0, 1);
 
 
         ProductResponseDTO result = productService.updateProduct(request, "prod-1", "owner-A");
@@ -76,12 +77,39 @@ class ProductServiceTest {
         assertThat(result.getPrice()).isEqualTo(1.0);
         assertThat(result.getDescription()).isEqualTo("new desc");
         assertThat(result.getQuantity()).isEqualTo(1);
+        assertThat(result.getCategory()).isEqualTo("Office");
         verify(productRepository).save(any(Product.class));
     }
 
     @Test
+    void createProduct_storesTrimmedCategoryAndCreationTime() {
+        ProductRequestDTO request = new ProductRequestDTO("Laptop", "desc", "  Electronics  ", 999.0, 5);
+        Instant before = Instant.now();
+        when(productRepository.save(any(Product.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+
+        ProductResponseDTO result = productService.createProduct(request, "seller-123");
+
+        assertThat(result.getCategory()).isEqualTo("Electronics");
+        assertThat(result.getCreatedAt()).isBetween(before, Instant.now());
+    }
+
+    @Test
+    void updateProduct_keepsCreationTime() {
+        Instant created = Instant.parse("2026-01-01T10:00:00Z");
+        Product existing = new Product("prod-1", "Laptop", "desc", 999.0, 5, "owner-A", "Electronics", created);
+        when(productRepository.findById("prod-1")).thenReturn(Optional.of(existing));
+        when(productRepository.save(any(Product.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        ProductResponseDTO result = productService.updateProduct(
+                new ProductRequestDTO("Laptop", "desc", "Office", 1.0, 1), "prod-1", "owner-A");
+
+        assertThat(result.getCreatedAt()).isEqualTo(created);
+    }
+
+    @Test
     void deleteProduct_throwsForbidden_whenNotOwner() {
-        Product existing = new Product("prod-1", "Laptop", "desc", 999.0, 5, "owner-A");
+        Product existing = new Product("prod-1", "Laptop", "desc", 999.0, 5, "owner-A", "Electronics", null);
         when(productRepository.findById("prod-1")).thenReturn(Optional.of(existing));
 
         assertThatThrownBy(() ->
@@ -104,7 +132,7 @@ class ProductServiceTest {
     void updateProduct_throwsNotFound_whenProductMissing() {
         when(productRepository.findById("missing-id")).thenReturn(Optional.empty());
 
-        ProductRequestDTO request = new ProductRequestDTO("Laptop", "desc", 1.0, 1);
+        ProductRequestDTO request = new ProductRequestDTO("Laptop", "desc", "Electronics", 1.0, 1);
 
         assertThatThrownBy(() ->
                 productService.updateProduct(request, "missing-id", "any-caller"))

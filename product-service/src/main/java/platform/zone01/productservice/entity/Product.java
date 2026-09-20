@@ -8,6 +8,8 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.time.Instant;
+
 @Document(collection = "products")
 @AllArgsConstructor
 @NoArgsConstructor
@@ -27,4 +29,9 @@ public class Product {
 
     @Indexed
     private String userId;
+
+    @Indexed
+    private String category;
+
+    private Instant createdAt;
 }

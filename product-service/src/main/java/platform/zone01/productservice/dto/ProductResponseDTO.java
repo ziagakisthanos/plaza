@@ -3,6 +3,8 @@ package platform.zone01.productservice.dto;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
+import java.time.Instant;
+
 @AllArgsConstructor
 @Getter
 public class ProductResponseDTO {
@@ -12,4 +14,6 @@ public class ProductResponseDTO {
     private Double price;
     private Integer quantity;
     private String userId;
+    private String category;
+    private Instant createdAt;
 }

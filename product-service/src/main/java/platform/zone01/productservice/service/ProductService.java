@@ -9,6 +9,7 @@ import platform.zone01.productservice.exception.NotProductOwnerException;
 import platform.zone01.productservice.exception.ProductNotFoundException;
 import platform.zone01.productservice.repository.ProductRepository;
 
+import java.time.Instant;
 import java.util.List;
 
 @Service
@@ -43,6 +44,8 @@ public class ProductService {
         product.setPrice(requestDto.getPrice());
         product.setQuantity(requestDto.getQuantity());
         product.setUserId(userId);
+        product.setCategory(requestDto.getCategory().trim());
+        product.setCreatedAt(Instant.now());
 
         Product saved = productRepository.save(product);
         return toResponseDTO(saved);
@@ -60,6 +63,7 @@ public class ProductService {
         product.setDescription(requestDto.getDescription());
         product.setPrice(requestDto.getPrice());
         product.setQuantity(requestDto.getQuantity());
+        product.setCategory(requestDto.getCategory().trim());
 
         Product updated = productRepository.save(product);
         return toResponseDTO(updated);
@@ -85,6 +89,8 @@ public class ProductService {
                 product.getDescription(),
                 product.getPrice(),
                 product.getQuantity(),
-                product.getUserId());
+                product.getUserId(),
+                product.getCategory(),
+                product.getCreatedAt());
     }
 }
