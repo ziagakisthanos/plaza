@@ -152,7 +152,7 @@ public class MediaService {
             throw new InvalidImageException("Could not read file");
         }
 
-        if (!ALLOWED_TYPES.contains(detectedType)) {
+        if (detectedType == null || !ALLOWED_TYPES.contains(detectedType)) {
             throw new InvalidImageException("Only JPEG and PNG images are allowed");
         }
         return detectedType;
