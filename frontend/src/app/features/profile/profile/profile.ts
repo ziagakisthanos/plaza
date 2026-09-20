@@ -1,16 +1,17 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { UserProfile, UserService } from '../../../core/services/user';
+import { ProfileStats } from '../profile-stats/profile-stats';
 
 @Component({
   selector: 'app-profile',
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, ProfileStats],
   templateUrl: './profile.html',
   styleUrl: './profile.css',
 })
 export class Profile implements OnInit {
-  private userService = inject(UserService);
-  private fb = inject(FormBuilder);
+  private readonly userService = inject(UserService);
+  private readonly fb = inject(FormBuilder);
 
   readonly avatarIds = ['1', '2', '3', '4', '5'];
 

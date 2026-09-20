@@ -106,5 +106,9 @@
         </form>
       </section>
     </div>
+
+    @if (profile(); as current) {
+      <app-profile-stats [role]="current.role" />
+    }
   }
 </div>

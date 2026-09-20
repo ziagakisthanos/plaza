@@ -1,0 +1,81 @@
+<section class="card card-pad stats">
+  <h2 class="block-title">{{ role() === 'SELLER' ? 'Your sales' : 'Your shopping' }}</h2>
+  <p class="block-hint">Cancelled orders are not counted.</p>
+
+  @if (loading()) {
+    <div class="skeleton" style="height: 84px"></div>
+  } @else if (error()) {
+    <div class="alert alert-error" role="alert">
+      <span class="material-icons">error_outline</span>{{ error() }}
+    </div>
+  } @else if (sellerStats(); as seller) {
+    <div class="tiles">
+      <div class="tile">
+        <span class="tile-label">Total earned</span>
+        <span class="tile-value">{{ seller.totalEarned | currency: 'USD' }}</span>
+      </div>
+      <div class="tile">
+        <span class="tile-label">Orders received</span>
+        <span class="tile-value">{{ seller.orderCount }}</span>
+      </div>
+    </div>
+
+    @if (seller.orderCount === 0) {
+      <p class="empty">No one has ordered from you yet. Your best-selling products will show up here.</p>
+    } @else {
+      <h3 class="rank-title">Best-selling products</h3>
+      <ol class="rank">
+        @for (product of seller.bestSelling; track product.productId) {
+          <li>
+            <span class="rank-name">{{ product.name }}</span>
+            <span class="rank-detail">{{ product.quantity }} {{ unitLabel(product.quantity) }} sold</span>
+            <span class="rank-amount">{{ product.amount | currency: 'USD' }}</span>
+          </li>
+        }
+      </ol>
+    }
+  } @else if (clientStats(); as client) {
+    <div class="tiles">
+      <div class="tile">
+        <span class="tile-label">Total spent</span>
+        <span class="tile-value">{{ client.totalSpent | currency: 'USD' }}</span>
+      </div>
+      <div class="tile">
+        <span class="tile-label">Orders placed</span>
+        <span class="tile-value">{{ client.orderCount }}</span>
+      </div>
+    </div>
+
+    @if (client.orderCount === 0) {
+      <p class="empty">
+        You have not ordered anything yet.
+        <a routerLink="/products">Browse the marketplace</a> to get started.
+      </p>
+    } @else {
+      <div class="ranks">
+        <div>
+          <h3 class="rank-title">Most bought</h3>
+          <ol class="rank">
+            @for (product of client.mostBought; track product.productId) {
+              <li>
+                <span class="rank-name">{{ product.name }}</span>
+                <span class="rank-detail">{{ product.quantity }} {{ unitLabel(product.quantity) }}</span>
+              </li>
+            }
+          </ol>
+        </div>
+        <div>
+          <h3 class="rank-title">Best products by spend</h3>
+          <ol class="rank">
+            @for (product of client.bestProducts; track product.productId) {
+              <li>
+                <span class="rank-name">{{ product.name }}</span>
+                <span class="rank-amount">{{ product.amount | currency: 'USD' }}</span>
+              </li>
+            }
+          </ol>
+        </div>
+      </div>
+    }
+  }
+</section>
