@@ -79,6 +79,24 @@
   font-size: 1.05rem;
 }
 
+.checkout {
+  margin-bottom: 0.75rem;
+}
+
+.payment-note {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0 0 0.9rem;
+  color: var(--ink-600);
+  font-size: 0.86rem;
+  font-weight: 550;
+}
+
+.payment-note .material-icons {
+  font-size: 1.1rem;
+}
+
 .summary-row {
   display: flex;
   justify-content: space-between;

@@ -89,6 +89,34 @@
           <span>Total</span>
           <span>{{ cart().total | currency: 'USD' }}</span>
         </div>
+
+        <form class="checkout" [formGroup]="checkoutForm" (ngSubmit)="placeOrder()" novalidate>
+          <div class="field">
+            <label for="delivery-address">Delivery address</label>
+            <textarea
+              id="delivery-address"
+              class="input"
+              rows="3"
+              maxlength="300"
+              placeholder="Name, phone number, street, city"
+              [class.is-invalid]="addressInvalid()"
+              formControlName="deliveryAddress"
+            ></textarea>
+            @if (addressInvalid()) {
+              <span class="field-error">Please enter where the order should be delivered</span>
+            }
+          </div>
+          <p class="payment-note">
+            <span class="material-icons">payments</span>Pay on delivery, nothing to pay now
+          </p>
+          @if (hasStockProblem()) {
+            <p class="field-error">Please lower the highlighted quantities before you order.</p>
+          }
+          <button class="btn btn-primary btn-block" type="submit" [disabled]="busy() || hasStockProblem()">
+            Place order
+          </button>
+        </form>
+
         <button class="btn btn-secondary btn-block" type="button" [disabled]="busy()" (click)="clear()">
           Empty cart
         </button>

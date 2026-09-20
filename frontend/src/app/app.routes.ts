@@ -7,6 +7,7 @@ import { authGuard } from './core/guards/auth-guard';
 import { roleGuard } from './core/guards/role-guard';
 import { clientGuard } from './core/guards/client-guard';
 import { CartPage } from './features/cart/cart/cart';
+import { OrdersPage } from './features/orders/orders/orders';
 import { Profile } from './features/profile/profile/profile';
 
 export const routes: Routes = [
@@ -20,6 +21,18 @@ export const routes: Routes = [
   },
   { path: 'profile', component: Profile, canActivate: [authGuard] },
   { path: 'cart', component: CartPage, canActivate: [authGuard, clientGuard] },
+  {
+    path: 'orders',
+    component: OrdersPage,
+    canActivate: [authGuard, clientGuard],
+    data: { mode: 'client' },
+  },
+  {
+    path: 'seller/orders',
+    component: OrdersPage,
+    canActivate: [authGuard, roleGuard],
+    data: { mode: 'seller' },
+  },
 
   { path: '', redirectTo: 'products', pathMatch: 'full' }, // default
 ];

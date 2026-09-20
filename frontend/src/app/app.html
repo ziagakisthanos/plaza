@@ -24,6 +24,9 @@
           <a routerLink="/dashboard" routerLinkActive="active">
             <span class="material-icons">insights</span>Dashboard
           </a>
+          <a routerLink="/seller/orders" routerLinkActive="active">
+            <span class="material-icons">receipt_long</span>Orders
+          </a>
         }
         @if (isLoggedIn() && isClient()) {
           <a routerLink="/cart" routerLinkActive="active">
@@ -31,6 +34,9 @@
             @if (cartCount() > 0) {
               <span class="cart-count" aria-label="{{ cartCount() }} items in cart">{{ cartCount() }}</span>
             }
+          </a>
+          <a routerLink="/orders" routerLinkActive="active">
+            <span class="material-icons">receipt_long</span>Orders
           </a>
         }
         @if (isLoggedIn()) {

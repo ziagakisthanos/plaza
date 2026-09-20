@@ -1,0 +1,67 @@
+<article class="order">
+  <header class="order-head">
+    <div>
+      <h3 class="order-title">Order #{{ shortId() }}</h3>
+      <p class="order-date">{{ order().createdAt | date: 'medium' }}</p>
+    </div>
+    <span [class]="'status status-' + order().status.toLowerCase()">{{ statusLabel() }}</span>
+  </header>
+
+  <ul class="order-items">
+    @for (item of order().items; track item.productId) {
+      <li>
+        <span class="item-name">{{ item.name }}</span>
+        <span class="item-qty">{{ item.quantity }} × {{ item.price | currency: 'USD' }}</span>
+        <span class="item-total">{{ item.lineTotal | currency: 'USD' }}</span>
+      </li>
+    }
+  </ul>
+
+  <dl class="order-meta">
+    <div>
+      <dt>Deliver to</dt>
+      <dd class="address">{{ order().deliveryAddress }}</dd>
+    </div>
+    <div>
+      <dt>Payment</dt>
+      <dd>Pay on delivery</dd>
+    </div>
+    <div class="order-total">
+      <dt>Total</dt>
+      <dd>{{ order().total | currency: 'USD' }}</dd>
+    </div>
+  </dl>
+
+  @if (actions().length > 0) {
+    <footer class="order-actions">
+      @for (action of actions(); track action.key) {
+        @if (confirmingKey() === action.key) {
+          <span class="confirm-text">Are you sure?</span>
+          <button
+            class="btn btn-danger btn-sm"
+            type="button"
+            [disabled]="busy()"
+            (click)="act.emit(action.key)"
+          >
+            Yes, {{ action.label.toLowerCase() }}
+          </button>
+          <button class="btn btn-secondary btn-sm" type="button" [disabled]="busy()" (click)="dismiss.emit()">
+            Keep it
+          </button>
+        } @else {
+          <button
+            class="btn btn-sm"
+            type="button"
+            [class.btn-primary]="action.tone === 'primary'"
+            [class.btn-secondary]="action.tone === 'secondary'"
+            [class.btn-danger]="action.tone === 'danger'"
+            [disabled]="busy()"
+            (click)="act.emit(action.key)"
+          >
+            <span class="material-icons icon">{{ action.icon }}</span>{{ action.label }}
+          </button>
+        }
+      }
+    </footer>
+  }
+</article>

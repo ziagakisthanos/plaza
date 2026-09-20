@@ -1,9 +1,11 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideRouter } from '@angular/router';
+import { Router, provideRouter } from '@angular/router';
 import { Subject, of, throwError } from 'rxjs';
 import { signal } from '@angular/core';
 import { CartPage } from './cart';
 import { Cart, CartService } from '../../../core/services/cart';
+import { OrderService } from '../../../core/services/order';
+import { Component } from '@angular/core';
 
 const book = { productId: 'p1', name: 'Book', price: 12.5, quantity: 2, availableStock: 10, lineTotal: 25 };
 const pen = { productId: 'p2', name: 'Pen', price: 0.1, quantity: 1, availableStock: 1, lineTotal: 0.1 };
@@ -16,6 +18,9 @@ function cartOf(...items: (typeof book)[]): Cart {
   };
 }
 
+@Component({ template: '' })
+class OrdersStub {}
+
 describe('CartPage', () => {
   let fixture: ComponentFixture<CartPage>;
   let element: HTMLElement;
@@ -27,6 +32,8 @@ describe('CartPage', () => {
     remove: ReturnType<typeof vi.fn>;
     clear: ReturnType<typeof vi.fn>;
   };
+  let checkout: ReturnType<typeof vi.fn>;
+  let navigate: ReturnType<typeof vi.spyOn>;
 
   async function create(cart: Cart, load = of(cart)): Promise<void> {
     state = signal(cart);
@@ -37,16 +44,28 @@ describe('CartPage', () => {
       remove: vi.fn().mockReturnValue(of(cart)),
       clear: vi.fn().mockReturnValue(of(undefined)),
     };
+    checkout = vi.fn().mockReturnValue(of([{ id: 'o1' }]));
     await TestBed.configureTestingModule({
       imports: [CartPage],
-      providers: [provideRouter([]), { provide: CartService, useValue: service }],
+      providers: [
+        provideRouter([{ path: 'orders', component: OrdersStub }]),
+        { provide: CartService, useValue: service },
+        { provide: OrderService, useValue: { checkout } },
+      ],
     }).compileComponents();
 
+    navigate = vi.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
     fixture = TestBed.createComponent(CartPage);
     element = fixture.nativeElement as HTMLElement;
     fixture.detectChanges();
     await fixture.whenStable();
     fixture.detectChanges();
+  }
+
+  function emptyCartButton(): HTMLButtonElement {
+    return Array.from(element.querySelectorAll<HTMLButtonElement>('.summary button')).find((b) =>
+      b.textContent?.includes('Empty cart'),
+    ) as HTMLButtonElement;
   }
 
   function button(label: string, index = 0): HTMLButtonElement {
@@ -90,7 +109,11 @@ describe('CartPage', () => {
     };
     await TestBed.configureTestingModule({
       imports: [CartPage],
-      providers: [provideRouter([]), { provide: CartService, useValue: service }],
+      providers: [
+        provideRouter([]),
+        { provide: CartService, useValue: service },
+        { provide: OrderService, useValue: { checkout: vi.fn() } },
+      ],
     }).compileComponents();
     fixture = TestBed.createComponent(CartPage);
     element = fixture.nativeElement as HTMLElement;
@@ -152,7 +175,7 @@ describe('CartPage', () => {
   it('empties the cart', async () => {
     await create(cartOf(book));
 
-    (element.querySelector('.summary button') as HTMLButtonElement).click();
+    emptyCartButton().click();
 
     expect(service.clear).toHaveBeenCalledTimes(1);
   });
@@ -191,7 +214,7 @@ describe('CartPage', () => {
     expect(button('Increase quantity').disabled).toBe(true);
     expect(button('Remove Book').disabled).toBe(true);
     expect(button('Remove Pen').disabled).toBe(true);
-    expect((element.querySelector('.summary button') as HTMLButtonElement).disabled).toBe(true);
+    expect(emptyCartButton().disabled).toBe(true);
 
     inFlight.next(cartOf(book));
     inFlight.complete();
@@ -212,5 +235,116 @@ describe('CartPage', () => {
     fixture.detectChanges();
 
     expect(element.querySelector('.alert-error')).toBeNull();
+  });
+
+  describe('checkout', () => {
+    function fillAddress(value: string): void {
+      const field = element.querySelector('#delivery-address') as HTMLTextAreaElement;
+      field.value = value;
+      field.dispatchEvent(new Event('input'));
+      fixture.detectChanges();
+    }
+
+    function submit(): void {
+      (element.querySelector('.checkout') as HTMLFormElement).dispatchEvent(new Event('submit'));
+      fixture.detectChanges();
+    }
+
+    it('explains that the payment happens on delivery', async () => {
+      await create(cartOf(book));
+
+      expect(element.querySelector('.payment-note')?.textContent).toContain('Pay on delivery');
+    });
+
+    it('asks for a delivery address instead of ordering without one', async () => {
+      await create(cartOf(book));
+
+      submit();
+
+      expect(checkout).not.toHaveBeenCalled();
+      expect(element.querySelector('.checkout .field-error')?.textContent).toContain('delivered');
+      expect(element.querySelector('#delivery-address')?.classList).toContain('is-invalid');
+    });
+
+    it('does not accept an address made only of spaces', async () => {
+      await create(cartOf(book));
+      fillAddress('   ');
+
+      submit();
+
+      expect(checkout).not.toHaveBeenCalled();
+      expect(element.querySelector('.checkout .field-error')?.textContent).toContain('delivered');
+    });
+
+    it('places the order, refreshes the cart and shows the orders', async () => {
+      await create(cartOf(book));
+      fillAddress('  12 Main Street, Athens  ');
+
+      submit();
+
+      expect(checkout).toHaveBeenCalledWith({
+        paymentMethod: 'PAY_ON_DELIVERY',
+        deliveryAddress: '12 Main Street, Athens',
+      });
+      expect(service.load).toHaveBeenCalledTimes(2);
+      expect(navigate).toHaveBeenCalledWith(['/orders'], { state: { placed: 1 } });
+    });
+
+    it('tells the orders page how many orders were created', async () => {
+      await create(cartOf(book, pen));
+      checkout.mockReturnValue(of([{ id: 'o1' }, { id: 'o2' }]));
+      fillAddress('12 Main Street');
+
+      submit();
+
+      expect(navigate).toHaveBeenCalledWith(['/orders'], { state: { placed: 2 } });
+    });
+
+    it('shows why the order was refused, keeps the client here and refreshes the stock', async () => {
+      await create(cartOf(book));
+      checkout.mockReturnValue(
+        throwError(() => ({ error: { message: "Not enough stock for 'Book': only 1 left" } })),
+      );
+      fillAddress('12 Main Street');
+
+      submit();
+
+      expect(element.querySelector('.alert-error')?.textContent).toContain('only 1 left');
+      expect(navigate).not.toHaveBeenCalled();
+      expect(service.load).toHaveBeenCalledTimes(2);
+      expect((element.querySelector('.checkout button[type="submit"]') as HTMLButtonElement).disabled).toBe(false);
+    });
+
+    it('falls back to a friendly message when the server gives no reason', async () => {
+      await create(cartOf(book));
+      checkout.mockReturnValue(throwError(() => ({ status: 0 })));
+      fillAddress('12 Main Street');
+
+      submit();
+
+      expect(element.querySelector('.alert-error')?.textContent).toContain('We could not place your order');
+    });
+
+    it('does not order while a quantity is above the stock', async () => {
+      await create(cartOf({ ...book, quantity: 5, availableStock: 2 }));
+
+      const button = element.querySelector('.checkout button[type="submit"]') as HTMLButtonElement;
+
+      expect(button.disabled).toBe(true);
+      expect(element.querySelector('.checkout .field-error')?.textContent).toContain('lower the highlighted');
+    });
+
+    it('blocks the button while the order is being placed, so it cannot be sent twice', async () => {
+      await create(cartOf(book));
+      const inFlight = new Subject<unknown[]>();
+      checkout.mockReturnValue(inFlight);
+      fillAddress('12 Main Street');
+
+      submit();
+
+      expect((element.querySelector('.checkout button[type="submit"]') as HTMLButtonElement).disabled).toBe(true);
+      inFlight.next([{ id: 'o1' }]);
+      inFlight.complete();
+    });
   });
 });

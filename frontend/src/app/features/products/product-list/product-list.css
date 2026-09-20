@@ -109,35 +109,7 @@
   }
 }
 
-/* --- toolbar ------------------------------------------------------------- */
-
-.toolbar {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.6rem;
-  margin-bottom: 1.5rem;
-}
-
-.search {
-  position: relative;
-  flex: 1 1 260px;
-  max-width: 420px;
-}
-
-.search .material-icons {
-  position: absolute;
-  top: 50%;
-  left: 0.7rem;
-  transform: translateY(-50%);
-  color: var(--ink-400);
-  font-size: 1.2rem;
-  pointer-events: none;
-}
-
-.search .input {
-  padding-left: 2.5rem;
-}
+/* --- filters ------------------------------------------------------------- */
 
 .chip {
   display: inline-flex;
@@ -183,13 +155,6 @@
   margin-top: 0.85rem;
 }
 
-.filter .input {
-  width: auto;
-  min-width: 160px;
-  padding-right: 2rem;
-  cursor: pointer;
-}
-
 .price-range {
   display: flex;
   align-items: center;
@@ -220,30 +185,6 @@
   min-width: 190px;
   padding-right: 2rem;
   cursor: pointer;
-}
-
-.result-count {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  margin-bottom: 1rem;
-  color: var(--ink-500);
-  font-size: 0.87rem;
-  font-weight: 550;
-}
-
-.link-btn {
-  padding: 0;
-  border: 0;
-  background: none;
-  color: var(--brand-600);
-  font: inherit;
-  font-weight: 600;
-  cursor: pointer;
-}
-
-.link-btn:hover {
-  text-decoration: underline;
 }
 
 .empty-state h3 {
