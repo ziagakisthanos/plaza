@@ -39,6 +39,11 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body);
     }
 
+    @ExceptionHandler(CartEmptyException.class)
+    public ResponseEntity<ErrorResponseDTO> handleEmptyCart(CartEmptyException ex, HttpServletRequest request) {
+        return errorResponse(HttpStatus.BAD_REQUEST, ex.getMessage(), request);
+    }
+
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<ErrorResponseDTO> handleUnreadableBody(HttpMessageNotReadableException ex, HttpServletRequest request) {
         return errorResponse(HttpStatus.BAD_REQUEST, "Malformed request body", request);
