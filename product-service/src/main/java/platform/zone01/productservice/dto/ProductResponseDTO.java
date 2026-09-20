@@ -2,6 +2,7 @@ package platform.zone01.productservice.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import platform.zone01.productservice.entity.Product;
 
 import java.time.Instant;
 
@@ -16,4 +17,16 @@ public class ProductResponseDTO {
     private String userId;
     private String category;
     private Instant createdAt;
+
+    public static ProductResponseDTO from(Product product) {
+        return new ProductResponseDTO(
+                product.getId(),
+                product.getName(),
+                product.getDescription(),
+                product.getPrice(),
+                product.getQuantity(),
+                product.getUserId(),
+                product.getCategory(),
+                product.getCreatedAt());
+    }
 }

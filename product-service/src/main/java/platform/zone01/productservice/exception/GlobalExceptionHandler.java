@@ -48,6 +48,11 @@ public class GlobalExceptionHandler {
         return  errorResponse(HttpStatus.FORBIDDEN, ex.getMessage(), request);
     }
 
+    @ExceptionHandler(InsufficientStockException.class)
+    public ResponseEntity<ErrorResponseDTO> handleInsufficientStockException(InsufficientStockException ex, HttpServletRequest request) {
+        return errorResponse(HttpStatus.CONFLICT, ex.getMessage(), request);
+    }
+
     private ResponseEntity<ErrorResponseDTO> errorResponse(HttpStatus status, String message, HttpServletRequest request) {
         ErrorResponseDTO error = new ErrorResponseDTO(Instant.now(),status.value(), message , request.getRequestURI());
         return ResponseEntity.status(status).body(error);

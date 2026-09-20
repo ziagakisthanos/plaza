@@ -42,7 +42,7 @@ public class ProductService {
     public List<ProductResponseDTO> searchProducts(ProductSearchCriteria criteria) {
         Query query = buildQuery(criteria);
         return mongoTemplate.find(query, Product.class).stream()
-                .map(this::toResponseDTO)
+                .map(ProductResponseDTO::from)
                 .toList();
     }
 
@@ -56,7 +56,7 @@ public class ProductService {
     public ProductResponseDTO getProductById(String id) {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new ProductNotFoundException("Product with id: " + id + " not found"));
-        return toResponseDTO(product);
+        return ProductResponseDTO.from(product);
     }
 
     public ProductResponseDTO createProduct(ProductRequestDTO requestDto, String userId) {
@@ -70,7 +70,7 @@ public class ProductService {
         product.setCreatedAt(Instant.now());
 
         Product saved = productRepository.save(product);
-        return toResponseDTO(saved);
+        return ProductResponseDTO.from(saved);
     }
 
     public ProductResponseDTO updateProduct(ProductRequestDTO requestDto,String id, String userId) {
@@ -88,7 +88,7 @@ public class ProductService {
         product.setCategory(requestDto.getCategory().trim());
 
         Product updated = productRepository.save(product);
-        return toResponseDTO(updated);
+        return ProductResponseDTO.from(updated);
     }
 
     public void deleteProduct(String id, String userId) {
@@ -145,17 +145,5 @@ public class ProductService {
             case "price_desc" -> Sort.by(Sort.Direction.DESC, PRICE);
             default -> Sort.by(Sort.Direction.DESC, CREATED_AT);
         };
-    }
-
-    private ProductResponseDTO toResponseDTO(Product product) {
-        return new ProductResponseDTO(
-                product.getId(),
-                product.getName(),
-                product.getDescription(),
-                product.getPrice(),
-                product.getQuantity(),
-                product.getUserId(),
-                product.getCategory(),
-                product.getCreatedAt());
     }
 }
