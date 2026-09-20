@@ -11,7 +11,13 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
     group_add:
       - "999"            # docker socket group, may need adjusting per machine
+    networks:
+      - safe-zone-net
     restart: unless-stopped
 
 volumes:
   jenkins_home:
+
+networks:
+  safe-zone-net:
+    external: true
