@@ -29,8 +29,8 @@ pipeline {
     environment {
         // Secret comes from Jenkins credentials, never hardcoded
         JWT_SECRET = credentials('jwt-secret')
-        // Fixed project name => predictable image names (buy01-<service>)
-        COMPOSE_PROJECT_NAME = 'buy01'
+        // Fixed project name => predictable image names (buy02-<service>)
+        COMPOSE_PROJECT_NAME = 'buy02'
         SONAR_HOST_URL = 'http://sonarqube:9000'
         SONAR_TOKEN = credentials('sonar-token')
     }

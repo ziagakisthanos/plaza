@@ -2,17 +2,17 @@ services:
   # ---------- Infrastructure ----------
   mongo:
     image: mongo:7
-    container_name: buy01-mongo
+    container_name: buy02-mongo
     ports:
       - "27017:27017"
     volumes:
       - mongo-data:/data/db
     networks:
-      - buy01-net
+      - buy02-net
 
   minio:
     image: quay.io/minio/minio:latest
-    container_name: buy01-minio
+    container_name: buy02-minio
     ports:
       - "9000:9000"
       - "9001:9001"
@@ -23,11 +23,11 @@ services:
     volumes:
       - minio-data:/data
     networks:
-      - buy01-net
+      - buy02-net
 
   kafka:
     image: confluentinc/cp-kafka:7.7.1
-    container_name: buy01-kafka
+    container_name: buy02-kafka
     ports:
       - "9092:9092"
     environment:
@@ -46,23 +46,23 @@ services:
     volumes:
       - kafka-data:/var/lib/kafka/data
     networks:
-      - buy01-net
+      - buy02-net
 
   # ---------- Discovery (must start first) ----------
   discovery:
     build: ./discovery
-    container_name: buy01-discovery
+    container_name: buy02-discovery
     ports:
       - "8761:8761"
     environment:
       SPRING_PROFILES_ACTIVE: docker
     networks:
-      - buy01-net
+      - buy02-net
 
   # ---------- Gateway ----------
   gateway:
     build: ./gateway
-    container_name: buy01-gateway
+    container_name: buy02-gateway
     ports:
       - "8080:8080"
     environment:
@@ -70,12 +70,12 @@ services:
     depends_on:
       - discovery
     networks:
-      - buy01-net
+      - buy02-net
 
   # ---------- Business services ----------
   user-service:
     build: ./user-service
-    container_name: buy01-user
+    container_name: buy02-user
     environment:
       SPRING_PROFILES_ACTIVE: docker
       JWT_SECRET: ${JWT_SECRET}
@@ -83,11 +83,11 @@ services:
       - discovery
       - mongo
     networks:
-      - buy01-net
+      - buy02-net
 
   product-service:
     build: ./product-service
-    container_name: buy01-product
+    container_name: buy02-product
     environment:
       SPRING_PROFILES_ACTIVE: docker
       JWT_SECRET: ${JWT_SECRET}
@@ -96,11 +96,11 @@ services:
       - mongo
       - kafka
     networks:
-      - buy01-net
+      - buy02-net
 
   media-service:
     build: ./media-service
-    container_name: buy01-media
+    container_name: buy02-media
     environment:
       SPRING_PROFILES_ACTIVE: docker
       JWT_SECRET: ${JWT_SECRET}
@@ -110,17 +110,17 @@ services:
       - kafka
       - minio
     networks:
-      - buy01-net
+      - buy02-net
 
   frontend:
     build: ./frontend          # points at frontend/Dockerfile
-    container_name: buy01-frontend
+    container_name: buy02-frontend
     ports:
       - "4200:80"              # host 4200 -> nginx port 80 in container
     depends_on:
       - gateway
     networks:
-      - buy01-net
+      - buy02-net
 
 volumes:
   mongo-data:
@@ -128,5 +128,5 @@ volumes:
   kafka-data:
 
 networks:
-  buy01-net:
+  buy02-net:
     driver: bridge
