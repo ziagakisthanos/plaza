@@ -103,7 +103,8 @@ Verify: `docker ps` shows `buy01-mongo`, `buy01-minio`, `buy01-kafka`.
 
 ### 2. Set the JWT secret
 Each service reads `JWT_SECRET` (must be identical across services). Set it as an environment
-variable, or rely on the dev default in each service's `application.yml`.
+variable, or rely on the dev default in each service's `application.yml`. When you start the stack
+with `docker compose`, put it in `.env` (copy `.env.example`), which compose reads automatically.
 
 ### 3. Start the backend services (in order)
 Run from your IDE or with Maven, starting Discovery first:
