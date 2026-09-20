@@ -45,6 +45,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/orders/checkout").hasRole(CLIENT)
                         .requestMatchers(HttpMethod.GET, "/orders").hasRole(CLIENT)
                         .requestMatchers(HttpMethod.GET, "/orders/seller").hasRole(SELLER)
+                        .requestMatchers(HttpMethod.GET, "/orders/stats/client").hasRole(CLIENT)
+                        .requestMatchers(HttpMethod.GET, "/orders/stats/seller").hasRole(SELLER)
                         .requestMatchers(HttpMethod.PUT, "/orders/*/status").hasRole(SELLER)
                         .requestMatchers(HttpMethod.DELETE, "/orders/*").hasRole(CLIENT)
                         .requestMatchers(HttpMethod.POST, "/orders/*/redo").hasRole(CLIENT)
