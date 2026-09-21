@@ -1,0 +1,31 @@
+name: nexus
+
+services:
+  nexus:
+    image: sonatype/nexus3:3.95.4
+    container_name: nexus
+    ports:
+      - "8091:8081"
+      - "5000:5000"
+    environment:
+      INSTALL4J_ADD_VM_PARAMS: >-
+        -Xms1g -Xmx2g -XX:MaxDirectMemorySize=2g
+        -Djava.util.prefs.userRoot=/nexus-data/javaprefs
+    volumes:
+      - nexus-data:/nexus-data
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:8081/service/rest/v1/status || exit 1"]
+      interval: 15s
+      timeout: 10s
+      retries: 30
+      start_period: 90s
+    networks:
+      - safe-zone-net
+    restart: unless-stopped
+
+volumes:
+  nexus-data:
+
+networks:
+  safe-zone-net:
+    external: true
