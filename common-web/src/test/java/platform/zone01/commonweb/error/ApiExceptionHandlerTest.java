@@ -48,12 +48,8 @@ class ApiExceptionHandlerTest {
     private final MockHttpServletRequest servletRequest = new MockHttpServletRequest("POST", "/orders/checkout");
     private final WebRequest request = new ServletWebRequest(servletRequest);
 
-    @SuppressWarnings("unused")
-    private void sample(String status) {
-    }
-
     private Method sampleMethod() throws NoSuchMethodException {
-        return getClass().getDeclaredMethod("sample", String.class);
+        return String.class.getMethod("startsWith", String.class);
     }
 
     private ParameterValidationResult blankParameter() throws NoSuchMethodException {
