@@ -1,6 +1,6 @@
 # Contributing
 
-All work happens on `main`, in small commits. Each commit is checked automatically by Jenkins and reviewed by a code owner before it counts as approved.
+Every change is built and tested by Jenkins, and every change on `main` also has to pass the SonarQube quality gate before anything is deployed. Small changes can go straight to `main`. A change that someone should read first goes on a branch and through a pull request.
 
 ## Commit messages
 
@@ -17,29 +17,29 @@ fix sonar bugs
 - Frontend: `cd frontend && npm test` must pass.
 - Never commit `.env`, tokens or passwords.
 
-## Automatic checks
+## What Jenkins does
 
-Jenkins polls `main` every two minutes, and also runs every night. Each run:
+Jenkins polls the repository every two minutes and also runs every night. The stages depend on the branch that is being built.
 
-1. builds all modules and runs the unit tests,
-2. sends the code and the JaCoCo coverage report to SonarQube and waits for the quality gate,
-3. builds the images and deploys, only if everything before it passed.
+| Stage | Any branch | `main` only |
+|---|---|---|
+| Build all modules and run the unit tests (with JaCoCo coverage) | yes | yes |
+| SonarQube analysis and quality gate | no | yes |
+| Build the images | no | yes |
+| Deploy, smoke check and rollback if it fails | no | yes |
 
-The quality gate fails the build when the project has any bug, any vulnerability or any unreviewed security hotspot, or when the new code has issues, less than 80% coverage, more than 3% duplication or unreviewed hotspots. A failed gate stops the pipeline before anything is built or deployed, and the failure notification is written to the build log.
+A branch build therefore never deploys and never touches the SonarQube project. SonarQube Community Build analyses one branch only, so the quality gate runs once the change is on `main`.
 
-## Review and approval
+The gate fails the build when the new code has any issue, less than 80% coverage, more than 3% duplication or unreviewed security hotspots, or when the project has any bug or vulnerability. A failed gate stops the pipeline before any image is built or deployed. What has been fixed because of the gate is listed in [docs/sonarqube.md](docs/sonarqube.md).
 
-The people who review are listed in `.gitea/CODEOWNERS`.
+## Working on a branch and a pull request
 
-1. Push your commit to `main` and wait for the Jenkins build.
-2. A red build must be fixed straight away with a follow-up commit.
-3. A code owner reviews the commit: read it with `git show <commit>` or on its Gitea page, and check the new issues SonarQube reports for it.
-4. If the reviewer finds a problem, it is fixed in a follow-up commit and reviewed again.
-5. If the commit is good and its build is green, the reviewer records the approval as a git note:
+1. Create a branch named `feature/<what-it-does>` and push it. Jenkins builds and tests it.
+2. Open a pull request into `main` on Gitea.
+3. The code owner listed in `.gitea/CODEOWNERS` reviews it. Problems are fixed with follow-up commits on the same branch.
+4. Merge once the branch build is green and the review is done.
+5. Watch the build of `main` that follows: the analysis and the deploy run there. If the gate fails, fix it straight away, with a small commit or a new branch.
 
-```
-git notes --ref=reviews add -m "approved by <name>" <commit>
-git push origin refs/notes/reviews
-```
+## Working directly on `main`
 
-Approvals are listed with `git log --show-notes=reviews` after `git fetch origin refs/notes/reviews:refs/notes/reviews`.
+For a small change, commit on `main` and wait for the Jenkins build. A red build is fixed straight away with a follow-up commit.
