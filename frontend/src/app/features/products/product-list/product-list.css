@@ -191,6 +191,43 @@
   margin-bottom: 0.2rem;
 }
 
+@media (max-width: 640px) {
+  .toolbar {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .search,
+  .filter,
+  .price-range {
+    grid-column: 1 / -1;
+    max-width: none;
+  }
+
+  .filter .input,
+  .sort .input {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .price-range label {
+    flex: 1 1 0;
+  }
+
+  .price-range .input {
+    width: 100%;
+  }
+
+  .chip {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .sort {
+    margin-left: 0;
+  }
+}
+
 @media (max-width: 860px) {
   .hero-inner {
     grid-template-columns: 1fr;
@@ -202,12 +239,4 @@
     max-width: 320px;
   }
 
-  .sort {
-    margin-left: 0;
-    flex: 1 1 100%;
-  }
-
-  .sort .input {
-    width: 100%;
-  }
 }

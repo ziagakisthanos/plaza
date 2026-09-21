@@ -70,20 +70,23 @@
 }
 
 .rank-name {
-  flex: 1 1 auto;
+  flex: 1 1 0;
   min-width: 0;
   overflow-wrap: anywhere;
   font-weight: 600;
 }
 
 .rank-detail {
+  flex: 0 0 auto;
   color: var(--ink-500);
+  white-space: nowrap;
 }
 
 .rank-amount {
-  min-width: 4.5rem;
+  flex: 0 0 auto;
   text-align: right;
   font-weight: 650;
+  white-space: nowrap;
 }
 
 .empty {

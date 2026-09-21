@@ -1,5 +1,7 @@
 import { Component, input } from '@angular/core';
 
+let nextGradient = 0;
+
 /** The buy-02 logo glyph. `tone="light"` renders it for dark backgrounds. */
 @Component({
   selector: 'app-brand-mark',
@@ -9,7 +11,7 @@ import { Component, input } from '@angular/core';
         width="32"
         height="32"
         rx="9"
-        [attr.fill]="tone() === 'light' ? '#ffffff' : 'url(#bm)'"
+        [attr.fill]="tone() === 'light' ? '#ffffff' : 'url(#' + gradientId + ')'"
       />
       <path
         d="M10 11.5h11.2l-1.4 7.6a2 2 0 0 1-2 1.6h-5.3a2 2 0 0 1-2-1.7L9 9.5H6.8"
@@ -22,7 +24,7 @@ import { Component, input } from '@angular/core';
       <circle cx="13" cy="24" r="1.6" [attr.fill]="tone() === 'light' ? '#4b36ba' : '#ffffff'" />
       <circle cx="19.4" cy="24" r="1.6" [attr.fill]="tone() === 'light' ? '#4b36ba' : '#ffffff'" />
       <defs>
-        <linearGradient id="bm" x1="0" y1="0" x2="32" y2="32">
+        <linearGradient [attr.id]="gradientId" x1="0" y1="0" x2="32" y2="32">
           <stop stop-color="#8e80f0" />
           <stop offset="1" stop-color="#4b36ba" />
         </linearGradient>
@@ -36,6 +38,8 @@ import { Component, input } from '@angular/core';
   `,
 })
 export class BrandMark {
+  readonly gradientId = `brand-mark-gradient-${nextGradient++}`;
+
   size = input(30);
   tone = input<'dark' | 'light'>('dark');
 }

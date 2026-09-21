@@ -67,7 +67,7 @@
 
 .order-items li {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto 5.5rem;
+  grid-template-columns: minmax(0, 1fr) auto auto;
   gap: 0.75rem;
   padding: 0.55rem 0;
   border-bottom: 1px solid var(--border);
@@ -84,8 +84,10 @@
 }
 
 .item-total {
+  min-width: 5rem;
   text-align: right;
   font-weight: 650;
+  white-space: nowrap;
 }
 
 .order-meta {
@@ -145,7 +147,7 @@
   }
 
   .order-items li {
-    grid-template-columns: minmax(0, 1fr) 5rem;
+    grid-template-columns: minmax(0, 1fr) auto;
   }
 
   .item-qty {
