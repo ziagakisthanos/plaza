@@ -1,0 +1,16 @@
+<div class="toasts" aria-live="polite">
+  @for (item of notificationService.notifications(); track item.id) {
+    <div
+      class="toast rise-in"
+      [class.toast-error]="item.kind === 'error'"
+      [class.toast-success]="item.kind === 'success'"
+      [attr.role]="item.kind === 'error' ? 'alert' : 'status'"
+    >
+      <span class="material-icons toast-icon">{{ item.kind === 'error' ? 'error_outline' : 'check_circle' }}</span>
+      <span class="toast-text">{{ item.text }}</span>
+      <button class="toast-close" type="button" aria-label="Dismiss" (click)="notificationService.dismiss(item.id)">
+        <span class="material-icons">close</span>
+      </button>
+    </div>
+  }
+</div>

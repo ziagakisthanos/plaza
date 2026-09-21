@@ -97,8 +97,8 @@ export class ProductList {
         switchMap((filters) =>
           this.productService.search(filters).pipe(
             switchMap((products) => this.withImages(products)),
-            catchError(() => {
-              this.fail();
+            catchError((error) => {
+              this.fail(error);
               return EMPTY;
             }),
           ),
@@ -133,8 +133,8 @@ export class ProductList {
     );
   }
 
-  private fail(): void {
-    this.error.set('We could not load the marketplace. Please try again.');
+  private fail(error: unknown): void {
+    this.error.set(apiErrorMessage(error, 'We could not load the marketplace. Please try again.'));
     this.loading.set(false);
   }
 

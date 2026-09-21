@@ -1,4 +1,4 @@
-package platform.zone01.userservice.dto;
+package platform.zone01.commonweb.error;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;

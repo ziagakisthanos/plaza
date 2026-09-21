@@ -195,7 +195,7 @@ describe('CartPage', () => {
 
   it('falls back to a friendly message when a removal fails without a reason', async () => {
     await create(cartOf(book));
-    service.remove.mockReturnValue(throwError(() => ({ status: 0 })));
+    service.remove.mockReturnValue(throwError(() => ({ status: 500 })));
 
     button('Remove Book').click();
     fixture.detectChanges();
@@ -225,7 +225,7 @@ describe('CartPage', () => {
 
   it('clears an old error when the next change starts', async () => {
     await create(cartOf(book));
-    service.remove.mockReturnValueOnce(throwError(() => ({ status: 0 })));
+    service.remove.mockReturnValueOnce(throwError(() => ({ status: 500 })));
 
     button('Remove Book').click();
     fixture.detectChanges();
@@ -317,7 +317,7 @@ describe('CartPage', () => {
 
     it('falls back to a friendly message when the server gives no reason', async () => {
       await create(cartOf(book));
-      checkout.mockReturnValue(throwError(() => ({ status: 0 })));
+      checkout.mockReturnValue(throwError(() => ({ status: 500 })));
       fillAddress('12 Main Street');
 
       submit();

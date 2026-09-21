@@ -161,7 +161,7 @@ describe('ProfileStats', () => {
   });
 
   it('falls back to a friendly message when the server gives no reason', async () => {
-    await show('SELLER', of(clientStats), throwError(() => ({ status: 0 })) as never);
+    await show('SELLER', of(clientStats), throwError(() => ({ status: 500 })) as never);
 
     expect(element.querySelector('.alert-error')?.textContent).toContain('We could not load your numbers');
   });

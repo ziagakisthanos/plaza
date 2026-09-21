@@ -5,13 +5,14 @@ import { AuthService } from './core/services/auth';
 import { CartService } from './core/services/cart';
 import { UserProfile, UserService } from './core/services/user';
 import { BrandMark } from './shared/brand-mark/brand-mark';
+import { Toasts } from './shared/toasts/toasts';
 
 /** Routes that render their own full-screen layout without the app chrome. */
 const BARE_ROUTES = ['/login', '/register'];
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, BrandMark],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, BrandMark, Toasts],
   templateUrl: './app.html',
   styleUrl: './app.css',
 })

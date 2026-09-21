@@ -24,6 +24,7 @@
         <module>gateway</module>
         <module>user-service</module>
         <module>common-security</module>
+        <module>common-web</module>
         <module>product-service</module>
         <module>media-service</module>
         <module>order-service</module>

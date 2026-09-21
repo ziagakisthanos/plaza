@@ -13,7 +13,7 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import platform.zone01.productservice.dto.ErrorResponseDTO;
+import platform.zone01.commonweb.error.ErrorResponseDTO;
 import platform.zone01.commonsecurity.jwt.JwtAuthFilter;
 
 import java.io.IOException;

@@ -46,6 +46,16 @@
             <version>0.0.1-SNAPSHOT</version>
         </dependency>
 
+        <dependency>
+
+            <groupId>platform.zone01</groupId>
+
+            <artifactId>common-web</artifactId>
+
+            <version>0.0.1-SNAPSHOT</version>
+
+        </dependency>
+
         <!-- MinIO client -->
         <dependency>
             <groupId>io.minio</groupId>

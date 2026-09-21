@@ -3,6 +3,7 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../../core/services/auth';
 import { BrandMark } from '../../../shared/brand-mark/brand-mark';
+import { apiErrorMessage } from '../../../core/utils/api-error';
 
 type Role = 'CLIENT' | 'SELLER';
 
@@ -85,10 +86,8 @@ export class Register {
         this.loading.set(false);
         if (err.status === 409) {
           this.errorMessage.set('An account with this email already exists');
-        } else if (err.status === 400 && err.error?.fieldErrors) {
-          this.errorMessage.set('Please check your input and try again');
         } else {
-          this.errorMessage.set('Something went wrong. Please try again.');
+          this.errorMessage.set(apiErrorMessage(err, 'Something went wrong. Please try again.'));
         }
       },
     });
