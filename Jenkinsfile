@@ -38,6 +38,7 @@ pipeline {
         COMPOSE_PROJECT_NAME = 'buy02'
         SONAR_HOST_URL = 'http://sonarqube:9000'
         SONAR_TOKEN = credentials('sonar-token')
+        NEXUS_URL = 'http://nexus:8081'
     }
 
     stages {
@@ -79,6 +80,16 @@ pipeline {
             steps {
                 echo 'Analysing code quality and waiting for the quality gate...'
                 sh 'sonar-scanner -Dsonar.qualitygate.wait=true'
+            }
+        }
+
+        stage('Publish Artifacts') {
+            when { expression { isMain() } }
+            steps {
+                echo 'Publishing artifacts to Nexus...'
+                withCredentials([usernamePassword(credentialsId: 'nexus-credentials', usernameVariable: 'NEXUS_USER', passwordVariable: 'NEXUS_PASSWORD')]) {
+                    sh 'mvn -s ci/settings.xml -Dnexus.url=${NEXUS_URL} deploy -DskipTests'
+                }
             }
         }
 
