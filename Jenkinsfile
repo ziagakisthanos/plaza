@@ -93,6 +93,16 @@ pipeline {
             }
         }
 
+        stage('Publish Images') {
+            when { expression { isMain() } }
+            steps {
+                echo 'Publishing images to Nexus...'
+                withCredentials([usernamePassword(credentialsId: 'nexus-credentials', usernameVariable: 'NEXUS_USER', passwordVariable: 'NEXUS_PASSWORD')]) {
+                    sh 'sh scripts/publish-images.sh'
+                }
+            }
+        }
+
         stage('Build Images') {
             when { expression { isMain() } }
             steps {
