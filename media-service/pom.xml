@@ -43,7 +43,7 @@
         <dependency>
             <groupId>platform.zone01</groupId>
             <artifactId>common-security</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
+            <version>${project.version}</version>
         </dependency>
 
         <dependency>
@@ -52,7 +52,7 @@
 
             <artifactId>common-web</artifactId>
 
-            <version>0.0.1-SNAPSHOT</version>
+            <version>${project.version}</version>
 
         </dependency>
 
