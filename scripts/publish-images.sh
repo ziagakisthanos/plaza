@@ -1,6 +1,7 @@
 #!/bin/sh
 set -eu
-
+# read project version from Maven plugin, package jars, log them into registry,
+# build the images and push them into docker image registry on :5000
 cd "$(dirname "$0")/.."
 
 if [ -f .env ]; then
