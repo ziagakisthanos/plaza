@@ -78,7 +78,7 @@ Stop everything with `docker compose down` (add `-v` to also delete the data).
 Inside Docker the gateway serves plain HTTP on 8080, which is what the frontend uses. Run outside Docker, it serves HTTPS on 8443 with a self-signed certificate that you create once in `gateway/src/main/resources`:
 
 ```bash
-keytool -genkeypair -alias buy01 -keyalg RSA -keysize 2048 -storetype PKCS12 \
+keytool -genkeypair -alias plaza -keyalg RSA -keysize 2048 -storetype PKCS12 \
   -keystore keystore.p12 -validity 365 -dname "CN=localhost" -storepass changeit
 ```
 
