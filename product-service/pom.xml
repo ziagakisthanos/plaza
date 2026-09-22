@@ -4,8 +4,8 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>platform.zone01</groupId>
-        <artifactId>buy-02</artifactId>
+        <groupId>platform.eshop</groupId>
+        <artifactId>plaza</artifactId>
         <version>1.2.0-SNAPSHOT</version>
     </parent>
 
@@ -42,12 +42,12 @@
             <artifactId>spring-boot-starter-security</artifactId>
         </dependency>
         <dependency>
-            <groupId>platform.zone01</groupId>
+            <groupId>platform.eshop</groupId>
             <artifactId>common-security</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>platform.zone01</groupId>
+            <groupId>platform.eshop</groupId>
             <artifactId>common-web</artifactId>
             <version>${project.version}</version>
         </dependency>
