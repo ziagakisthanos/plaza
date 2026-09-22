@@ -43,7 +43,7 @@ Each service owns its own MongoDB database and never reads another one.
 
 ## Tech stack
 
-Java 21, Spring Boot 3.3, Spring Cloud (Eureka, Gateway), Spring Security, Spring Data MongoDB, Spring Kafka, Maven (multi-module). Angular 21 (standalone components). MongoDB 7, Apache Kafka, MinIO. Docker, Jenkins, SonarQube.
+Java 21, Spring Boot 3.3, Spring Cloud (Eureka, Gateway), Spring Security, Spring Data MongoDB, Spring Kafka, Maven (multi-module). Angular 21 (standalone components). MongoDB 7, Apache Kafka, MinIO. Docker, Jenkins, SonarQube, Nexus Repository Manager.
 
 ## Design decisions
 
@@ -132,12 +132,31 @@ Jenkins builds, tests and deploys the project, and SonarQube checks the quality 
 |---|---|---|
 | Build, unit tests, JaCoCo | yes | yes |
 | SonarQube analysis and quality gate (fails the build) | | yes |
+| Publish artifacts and images to Nexus | | yes |
 | Build images, deploy, smoke check | | yes |
 
 - A failed deploy rolls back to the previous images. Nothing is left running after a build.
-- Jenkins polls every two minutes and runs every night. Secrets come from Jenkins credentials (`jwt-secret`, `sonar-token`).
+- Jenkins polls every two minutes and runs every night. Secrets come from Jenkins credentials (`jwt-secret`, `sonar-token`, `nexus-credentials`).
 - Start the tools with `docker compose -f docker-compose.sonar.yml up -d` (needs `SONAR_DB_PASSWORD` in `.env`) and then `docker compose -f docker-compose.jenkins.yml up -d --build`: Jenkins joins the Docker network that the SonarQube stack creates. Jenkins is on http://localhost:8090 and SonarQube on http://localhost:9100. Create a Pipeline job from SCM that builds `*/main` and `*/feature/**` with the script path `Jenkinsfile`, and a SonarQube project with the key `buy-02`.
 - How the work is reviewed and what the gate has improved: [CONTRIBUTING.md](CONTRIBUTING.md) and [docs/sonarqube.md](docs/sonarqube.md).
+
+## Artifact management (Nexus)
+
+Every build on `main` also publishes its own output to a private Nexus Repository Manager
+instance instead of leaving it inside the disposable build workspace:
+
+```bash
+cp .env.example .env                                # set NEXUS_ADMIN_PASSWORD, NEXUS_USER, NEXUS_PASSWORD
+docker compose -f docker-compose.nexus.yml up -d
+sh scripts/nexus-setup.sh                            # creates the repositories, idempotent
+./mvnw -s ci/settings.xml deploy -DskipTests          # jars to jars-releases / jars-snapshots
+sh scripts/publish-images.sh                          # images to docker-hosted
+```
+
+- Nexus UI: http://localhost:8091. Docker registry: `localhost:5000`.
+- Dependencies resolve through Nexus's `maven-central` proxy instead of hitting Maven Central directly.
+- Releases (`jars-releases`, images tagged with a plain version) cannot be redeployed once published; `main` keeps building `-SNAPSHOT`s.
+- Full setup, the repository layout, and how versions are cut and retrieved: [docs/nexus.md](docs/nexus.md).
 
 ## Known trade-offs
 
