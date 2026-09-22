@@ -2,7 +2,7 @@ import { Component, input } from '@angular/core';
 
 let nextGradient = 0;
 
-/** The buy-02 logo glyph. `tone="light"` renders it for dark backgrounds. */
+/** The Plaza logo glyph. `tone="light"` renders it for dark backgrounds. */
 @Component({
   selector: 'app-brand-mark',
   template: `

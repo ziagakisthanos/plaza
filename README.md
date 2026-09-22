@@ -1,4 +1,4 @@
-# buy-02: e-commerce microservices platform
+# Plaza: e-commerce microservices platform
 
 A marketplace built with Spring Boot microservices and an Angular frontend. Sellers list products with images. Clients search and filter them, fill a cart, check out with **pay on delivery**, and follow their orders. Both sides get a profile with their numbers.
 
